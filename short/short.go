@@ -6,11 +6,11 @@ import (
 	"fmt"
 	"log"
 
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/yougg/shortme/base"
 	"github.com/yougg/shortme/conf"
 	"github.com/yougg/shortme/sequence"
 	_ "github.com/yougg/shortme/sequence/db"
-	_ "github.com/go-sql-driver/mysql"
 )
 
 type shorter struct {

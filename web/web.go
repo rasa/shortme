@@ -4,11 +4,10 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/gorilla/mux"
 	"github.com/yougg/shortme/conf"
 	"github.com/yougg/shortme/web/api"
 	"github.com/yougg/shortme/web/www"
-
-	"github.com/gorilla/mux"
 )
 
 func Start() {

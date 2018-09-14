@@ -8,10 +8,9 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/gorilla/mux"
 	"github.com/yougg/shortme/conf"
 	"github.com/yougg/shortme/short"
-
-	"github.com/gorilla/mux"
 )
 
 func Redirect(w http.ResponseWriter, r *http.Request) {
