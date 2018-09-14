@@ -6,7 +6,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/andyxning/shortme/conf"
+	"github.com/yougg/shortme/conf"
 )
 
 func CheckVersion(w http.ResponseWriter, r *http.Request) {
