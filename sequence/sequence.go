@@ -34,7 +34,7 @@ func GetSequence(sequenceType string) (sequence Sequence, err error) {
 		sequence = value
 		return sequence, nil
 	} else {
-		return nil, fmt.Errorf("%v is not registered.", sequenceType)
+		return nil, fmt.Errorf("%v is not registered", sequenceType)
 	}
 }
 

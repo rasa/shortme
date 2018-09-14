@@ -10,10 +10,12 @@ import (
 	"github.com/yougg/shortme/web"
 )
 
-func main() {
-	cfgFile := flag.String("c", "config.conf", "configuration file")
-	version := flag.Bool("v", false, "Version")
+var (
+	cfgFile = flag.String("c", "config.json", "configuration file")
+	version = flag.Bool("v", false, "show version")
+)
 
+func main() {
 	flag.Parse()
 
 	if *version {

@@ -9,7 +9,7 @@ import (
 
 // Int2String converts an unsigned 64bit integer to a string.
 func Int2String(seq uint64) (shortURL string) {
-	charSeq := []rune{}
+	var charSeq []rune
 	if seq != 0 {
 		for seq != 0 {
 			mod := seq % conf.Conf.Common.BaseStringLength

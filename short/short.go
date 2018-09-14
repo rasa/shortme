@@ -20,6 +20,15 @@ type shorter struct {
 	sequence sequence.Sequence
 }
 
+var (
+	ErrQueryShortDB  = errors.New("short read db query error")
+	ErrScanShortRows = errors.New("short read db query rows scan error")
+	ErrIterShortRows = errors.New("short read db query rows iterate error")
+	ErrGetNextSeq    = errors.New("get next sequence error")
+	ErrPrepareSQL    = errors.New("short write db prepares error")
+	ErrInsertData    = errors.New("short write db insert error")
+)
+
 // connect will panic when it can not connect to DB server.
 func (shorter *shorter) mustConnect() {
 	shorter.reconnectReadDB()
@@ -81,17 +90,17 @@ func (shorter *shorter) reconnectSequence() {
 		shorter.sequence = nil
 	}
 
-	sequence, err := sequence.GetSequence("db")
+	seq, err := sequence.GetSequence("db")
 	if err != nil {
 		log.Panicf("get sequence instance error. %v", err)
 	}
 
-	err = sequence.Open()
+	err = seq.Open()
 	if err != nil {
 		log.Panicf("open sequence instance error. %v", err)
 	}
 
-	shorter.sequence = sequence
+	shorter.sequence = seq
 }
 
 func (shorter *shorter) close() {
@@ -123,11 +132,11 @@ func (shorter *shorter) Expand(shortURL string) (longURL string, err error) {
 			rows, err = shorter.readDB.Query(selectSQL, shortURL)
 			if err != nil {
 				log.Printf("short read db query error. %v", err)
-				return "", errors.New("short read db query error")
+				return "", ErrQueryShortDB
 			}
 		} else {
 			log.Printf("short read db query error. %v", err)
-			return "", errors.New("short read db query error")
+			return "", ErrQueryShortDB
 		}
 	}
 
@@ -137,14 +146,14 @@ func (shorter *shorter) Expand(shortURL string) (longURL string, err error) {
 		err = rows.Scan(&longURL)
 		if err != nil {
 			log.Printf("short read db query rows scan error. %v", err)
-			return "", errors.New("short read db query rows scan error")
+			return "", ErrScanShortRows
 		}
 	}
 
 	err = rows.Err()
 	if err != nil {
 		log.Printf("short read db query rows iterate error. %v", err)
-		return "", errors.New("short read db query rows iterate error")
+		return "", ErrIterShortRows
 	}
 
 	return longURL, nil
@@ -161,11 +170,11 @@ func (shorter *shorter) Short(longURL string) (shortURL string, err error) {
 				seq, err = shorter.sequence.NextSequence()
 				if err != nil {
 					log.Printf("get next sequence error. %v", err)
-					return "", errors.New("get next sequence error")
+					return "", ErrGetNextSeq
 				}
 			} else {
 				log.Printf("get next sequence error. %v", err)
-				return "", errors.New("get next sequence error")
+				return "", ErrGetNextSeq
 			}
 		}
 
@@ -188,11 +197,11 @@ func (shorter *shorter) Short(longURL string) (shortURL string, err error) {
 			stmt, err = shorter.writeDB.Prepare(insertSQL)
 			if err != nil {
 				log.Printf("short write db prepares error. %v", err)
-				return "", errors.New("short write db prepares error")
+				return "", ErrPrepareSQL
 			}
 		} else {
 			log.Printf("short write db prepares error. %v", err)
-			return "", errors.New("short write db prepares error")
+			return "", ErrPrepareSQL
 		}
 	}
 	defer stmt.Close()
@@ -205,11 +214,11 @@ func (shorter *shorter) Short(longURL string) (shortURL string, err error) {
 			_, err = stmt.Exec(longURL, shortURL)
 			if err != nil {
 				log.Printf("short write db insert error. %v", err)
-				return "", errors.New("short write db insert error")
+				return "", ErrInsertData
 			}
 		} else {
 			log.Printf("short write db insert error. %v", err)
-			return "", errors.New("short write db insert error")
+			return "", ErrInsertData
 		}
 	}
 
