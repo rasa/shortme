@@ -25,6 +25,7 @@ func Start() {
 
 	r.Handle("/static/{type}/{file}", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 	r.Handle("/favicon.ico", http.StripPrefix("/", http.FileServer(http.Dir("."))))
+	r.Handle("/robots.txt", http.StripPrefix("/", http.FileServer(http.Dir("."))))
 
 	log.Fatal(http.ListenAndServe(conf.Conf.Http.Listen, r))
 }
