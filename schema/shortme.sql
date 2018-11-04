@@ -26,9 +26,11 @@ CREATE TABLE `short` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `long_url` varchar(10240) NOT NULL,
   `short_url` varchar(11) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `long_hash` bigint(20) unsigned NOT NULL DEFAULT 0,
   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `idx_uniq_short_short_url` (`short_url`)
+  UNIQUE KEY `idx_uniq_short_short_url` (`short_url`),
+  KEY `idx_uniq_long_hash` (`long_hash`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;

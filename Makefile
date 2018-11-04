@@ -1,5 +1,11 @@
 version = 1.2.0
 
+ifeq ($(OS),Windows_NT)
+	EXTENSION=.exe
+else
+	EXTENSION=""
+endif
+
 dep:
 	go get -d ./...
 
@@ -13,7 +19,7 @@ fmt:
 	find . -type f -name "*.go" | grep -v "./vendor*" | xargs gofmt -s -w
 
 build: dep vet fmt
-	go build -ldflags="-X github.com/andyxning/shortme/conf.Version=$(version)" -o shortme main.go
+	go build -ldflags="-X github.com/andyxning/shortme/conf.Version=$(version)" -o shortme$(EXTENSION) main.go
 
 clean:
 	rm -f shortme
