@@ -19,19 +19,20 @@
 -- Table structure for table `short`
 --
 
-DROP TABLE IF EXISTS `short`;
+USE shortme;
+
+-- DROP TABLE IF EXISTS `short`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `short` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `long_url` varchar(10240) NOT NULL,
-  `short_url` varchar(11) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
-  `long_hash` bigint(20) unsigned NOT NULL DEFAULT 0,
-  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `idx_uniq_short_short_url` (`short_url`),
-  KEY `idx_uniq_long_hash` (`long_hash`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+  `short_url` varchar(255) NOT NULL,
+  `long_hash` bigint(20) unsigned NOT NULL,
+  `created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `long_url` varchar(65535) NOT NULL,
+  PRIMARY KEY (`short_url`),
+  KEY `idx_long_hash` (`long_hash`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE= utf8mb4_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
