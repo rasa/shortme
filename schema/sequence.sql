@@ -21,17 +21,13 @@
 
 USE sequence;
 
--- DROP TABLE IF EXISTS `sequence`;
+DROP TABLE IF EXISTS `sequence`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `sequence` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `stub` varchar(32) NOT NULL,
-  `created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `idx_uniq_sequence_stub` (`stub`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_bin;
+  `id` bigint(20) unsigned NOT NULL
+) ENGINE=MyISAM;
+INSERT INTO sequence (id) VALUES (0);
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 

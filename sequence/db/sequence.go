@@ -43,7 +43,7 @@ func (dbSeq *SequenceDB) Close() {
 
 func (dbSeq *SequenceDB) NextSequence() (sequence uint64, err error) {
 	var stmt *sql.Stmt
-	stmt, err = dbSeq.db.Prepare(`REPLACE INTO sequence(stub) VALUES ("sequence")`)
+	stmt, err = dbSeq.db.Prepare(`UPDATE sequence SET id=LAST_INSERT_ID(id+1) LIMIT 1`)
 	if err != nil {
 		log.Printf("sequence db prepare error. %v", err)
 		return 0, err
