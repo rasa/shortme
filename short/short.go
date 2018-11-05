@@ -112,21 +112,6 @@ func (shorter *shorter) Expand(shortURL string) (longURL string, err error) {
 }
 
 func (shorter *shorter) Short(longURL string) (shortURL string, err error) {
-	for {
-		var seq uint64
-		seq, err = shorter.sequence.NextSequence()
-		if err != nil {
-			log.Printf("get next sequence error. %v", err)
-			return "", errors.New("get next sequence error")
-		}
-
-		shortURL = base.Int2String(seq)
-		if _, exists := conf.Conf.Common.BlackShortURLsMap[shortURL]; exists {
-			continue
-		} else {
-			break
-		}
-	}
 
 	/*
 		k0 := uint64( 316665572293978160)
@@ -174,6 +159,20 @@ func (shorter *shorter) Short(longURL string) (shortURL string, err error) {
 
 	if short_url != "" {
 		return short_url, nil
+	}
+
+	for {
+		var seq uint64
+		seq, err = shorter.sequence.NextSequence()
+		if err != nil {
+			log.Printf("get next sequence error. %v", err)
+			return "", errors.New("get next sequence error")
+		}
+
+		shortURL = base.Int2String(seq)
+		if _, exists := conf.Conf.Common.BlackShortURLsMap[shortURL]; !exists {
+			break
+		}
 	}
 
 	insertSQL := fmt.Sprintf(`INSERT INTO short(long_url, short_url, long_hash) VALUES(?, ?, ?)`)
