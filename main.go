@@ -5,15 +5,17 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/andyxning/shortme/conf"
-	"github.com/andyxning/shortme/short"
-	"github.com/andyxning/shortme/web"
+	"github.com/yougg/shortme/conf"
+	"github.com/yougg/shortme/short"
+	"github.com/yougg/shortme/web"
+)
+
+var (
+	cfgFile = flag.String("c", "config.json", "configuration file")
+	version = flag.Bool("v", false, "show version")
 )
 
 func main() {
-	cfgFile := flag.String("c", "config.conf", "configuration file")
-	version := flag.Bool("v", false, "Version")
-
 	flag.Parse()
 
 	if *version {

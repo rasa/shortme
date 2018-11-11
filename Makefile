@@ -1,6 +1,7 @@
 version = 1.2.0
 
 ifeq ($(OS),Windows_NT)
+	export PATH := "C:/cygwin/bin:$(PATH)"
 	EXTENSION=.exe
 else
 	EXTENSION=""

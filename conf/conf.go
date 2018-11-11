@@ -2,44 +2,43 @@ package conf
 
 import (
 	"bytes"
+	"encoding/json"
 	"io/ioutil"
 	"log"
 	"os"
-
-	"github.com/BurntSushi/toml"
 )
 
 type sequenceDB struct {
-	DSN          string `toml:"dsn"`
-	MaxIdleConns int    `toml:"max_idle_conns"`
-	MaxOpenConns int    `toml:"max_open_conns"`
+	DSN          string `json:"dsn"`
+	MaxIdleConns int    `json:"max_idle_conns"`
+	MaxOpenConns int    `json:"max_open_conns"`
 }
 
 type http struct {
-	Listen string `toml:"listen"`
+	Listen string `json:"listen"`
 }
 
 type shortDB struct {
-	ReadDSN      string `toml:"read_dsn"`
-	WriteDSN     string `toml:"write_dsn"`
-	MaxIdleConns int    `toml:"max_idle_conns"`
-	MaxOpenConns int    `toml:"max_open_conns"`
+	ReadDSN      string `json:"read_dsn"`
+	WriteDSN     string `json:"write_dsn"`
+	MaxIdleConns int    `json:"max_idle_conns"`
+	MaxOpenConns int    `json:"max_open_conns"`
 }
 
 type common struct {
-	BlackShortURLs    []string `toml:"black_short_urls"`
-	BlackShortURLsMap map[string]bool
-	BaseString        string `toml:"base_string"`
-	BaseStringLength  uint64
-	DomainName        string `toml:"domain_name"`
-	Schema            string `toml:"schema"`
+	BlackShortURLs    []string        `json:"black_short_urls"`
+	BlackShortURLsMap map[string]bool `json:"-"`
+	BaseString        string          `json:"base_string"`
+	BaseStringLength  uint64          `json:"-"`
+	DomainName        string          `json:"domain_name"`
+	Schema            string          `json:"schema"`
 }
 
 type config struct {
-	Http       http       `toml:"http"`
-	SequenceDB sequenceDB `toml:"sequence_db"`
-	ShortDB    shortDB    `toml:"short_db"`
-	Common     common     `toml:"common"`
+	Http       http       `json:"http"`
+	SequenceDB sequenceDB `json:"sequence_db"`
+	ShortDB    shortDB    `json:"short_db"`
+	Common     common     `json:"common"`
 }
 
 var Conf config
@@ -63,7 +62,7 @@ func MustParseConfig(configFile string) {
 	}
 	content = bytes.TrimSpace(content)
 
-	err = toml.Unmarshal(content, &Conf)
+	err = json.Unmarshal(content, &Conf)
 	if err != nil {
 		log.Panicf("unmarshal toml object error. %v", err)
 	}

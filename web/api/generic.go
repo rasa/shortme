@@ -6,16 +6,16 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/andyxning/shortme/conf"
+	"github.com/yougg/shortme/conf"
 )
 
-func CheckVersion(w http.ResponseWriter, r *http.Request) {
+func CheckVersion(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	versionInfo, _ := json.Marshal(version{Version: conf.Version})
 	w.Write(versionInfo)
 }
 
-func CheckHealth(w http.ResponseWriter, r *http.Request) {
+func CheckHealth(w http.ResponseWriter, _ *http.Request) {
 	tpl := template.New("health.html")
 	var err error
 	tpl, err = tpl.ParseFiles("template/health.html")

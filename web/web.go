@@ -4,11 +4,10 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/andyxning/shortme/conf"
-	"github.com/andyxning/shortme/web/api"
-	"github.com/andyxning/shortme/web/www"
-
 	"github.com/gorilla/mux"
+	"github.com/yougg/shortme/conf"
+	"github.com/yougg/shortme/web/api"
+	"github.com/yougg/shortme/web/www"
 )
 
 func Start() {
@@ -21,6 +20,7 @@ func Start() {
 	r.HandleFunc("/expand", api.ExpandURL).Methods(http.MethodPost).HeadersRegexp("Content-Type", "application/json")
 	r.HandleFunc("/{shortenedURL:[a-zA-Z0-9]{1,11}}", api.Redirect).Methods(http.MethodGet)
 
+	r.HandleFunc("/", www.Index).Methods(http.MethodGet)
 	r.HandleFunc("/index.html", www.Index).Methods(http.MethodGet)
 
 	r.Handle("/static/{type}/{file}", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))

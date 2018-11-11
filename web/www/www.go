@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-func Index(w http.ResponseWriter, r *http.Request) {
+func Index(w http.ResponseWriter, _ *http.Request) {
 	tpl := template.New("index.html")
 	var err error
 	tpl, err = tpl.ParseFiles("template/index.html")

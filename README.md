@@ -1,7 +1,7 @@
 ![](logo.png)  
 ![](https://img.shields.io/badge/version-1.2.0-blue.svg)
 ![](https://img.shields.io/badge/LICENSE-AGPL-blue.svg)
-[![Build Status](https://travis-ci.org/andyxning/shortme.svg?branch=master)](https://travis-ci.org/andyxning/shortme)
+[![Build Status](https://travis-ci.org/yougg/shortme.svg?branch=master)](https://travis-ci.org/yougg/shortme)
 ### Introduction
 ----
 ShortMe is a url shortening service written in Golang.  
@@ -130,9 +130,9 @@ corresponding expanded page is shown.
 #### Compile
 ----
 ```bash
-mkdir -p $GOPATH/src/github.com/andyxning
-cd $GOPATH/src/github.com/andyxning
-git clone https://github.com/andyxning/shortme.git
+mkdir -p $GOPATH/src/github.com/yougg
+cd $GOPATH/src/github.com/yougg
+git clone https://github.com/yougg/shortme.git
 
 cd shortme
 make build
