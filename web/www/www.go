@@ -16,10 +16,10 @@ func Index(w http.ResponseWriter, _ *http.Request) {
 		w.Write([]byte(http.StatusText(http.StatusInternalServerError)))
 		return
 	}
-  
-  type Fields struct {
-		Title string
-		Short_url string
+
+	type Fields struct {
+		Title    string
+		ShortURL string
 	}
 	var fields = Fields{"yb.gd", "https://yb.gd/U"}
 

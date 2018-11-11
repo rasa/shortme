@@ -2,25 +2,26 @@ package short
 
 import (
 	"database/sql"
-	"encoding/hex"
 	"database/sql/driver"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"log"
 
 	"github.com/dchest/siphash"
+	"github.com/go-sql-driver/mysql"
+	"github.com/minio/highwayhash"
 	"github.com/rasa/shortme/base"
 	"github.com/rasa/shortme/conf"
 	"github.com/rasa/shortme/sequence"
-	"github.com/go-sql-driver/mysql"
-	"github.com/minio/highwayhash"
+	_ "github.com/rasa/shortme/sequence/db"
 )
 
 const (
-  UseHighwayHash = true
-  highwayhash_key_string = "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
-  siphash_k0 = uint64( 316665572293978160)
-  siphash_k1 = uint64(8573005253291875333)
+	UseHighwayHash         = true
+	highwayhash_key_string = "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
+	siphash_k0             = uint64(316665572293978160)
+	siphash_k1             = uint64(8573005253291875333)
 )
 
 type shorter struct {
@@ -41,11 +42,11 @@ var (
 var highwayhash_key []byte
 
 func init() {
-    var err error
-    highwayhash_key, err = hex.DecodeString(highwayhash_key_string)
-    if err != nil {
-      log.Panicf("Failed to decode key: %v", err)
-    }
+	var err error
+	highwayhash_key, err = hex.DecodeString(highwayhash_key_string)
+	if err != nil {
+		log.Panicf("Failed to decode key: %v", err)
+	}
 }
 
 // connect will panic when it can not connect to DB server.
@@ -179,19 +180,19 @@ func (shorter *shorter) Expand(shortURL string) (longURL string, err error) {
 }
 
 func (shorter *shorter) Short(longURL string) (shortURL string, err error) {
-  var long_hash uint64
-  
-  if UseHighwayHash {
-    hash, err := highwayhash.New64(highwayhash_key)
-    if err != nil {
-      log.Printf("Failed to decode key: %v", err)
-      return "", errors.New("Failed to decode key")
-    }
-    hash.Write([]byte(longURL))
-    long_hash = hash.Sum64()
-  } else {
+	var long_hash uint64
+
+	if UseHighwayHash {
+		hash, err := highwayhash.New64(highwayhash_key)
+		if err != nil {
+			log.Printf("Failed to decode key: %v", err)
+			return "", errors.New("Failed to decode key")
+		}
+		hash.Write([]byte(longURL))
+		long_hash = hash.Sum64()
+	} else {
 		long_hash = siphash.Hash(siphash_k0, siphash_k1, []byte(longURL))
-  }
+	}
 	selectSQL := fmt.Sprintf(`SELECT short_url FROM short WHERE long_hash=? and long_url=?`)
 
 	var rows *sql.Rows
