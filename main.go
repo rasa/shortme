@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/yougg/shortme/conf"
-	"github.com/yougg/shortme/short"
-	"github.com/yougg/shortme/web"
+	"github.com/rasa/shortme/conf"
+	"github.com/rasa/shortme/short"
+	"github.com/rasa/shortme/web"
 )
 
 var (

@@ -4,7 +4,7 @@ import (
 	"math"
 	"strings"
 
-	"github.com/yougg/shortme/conf"
+	"github.com/rasa/shortme/conf"
 )
 
 // Int2String converts an unsigned 64bit integer to a string.

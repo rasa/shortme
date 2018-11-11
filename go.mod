@@ -1,4 +1,4 @@
-module github.com/yougg/shortme
+module github.com/rasa/shortme
 
 require (
 	github.com/go-sql-driver/mysql v1.4.0

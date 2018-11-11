@@ -5,9 +5,9 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
-	"github.com/yougg/shortme/conf"
-	"github.com/yougg/shortme/web/api"
-	"github.com/yougg/shortme/web/www"
+	"github.com/rasa/shortme/conf"
+	"github.com/rasa/shortme/web/api"
+	"github.com/rasa/shortme/web/www"
 )
 
 func Start() {

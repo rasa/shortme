@@ -9,7 +9,7 @@
     <meta name="author" content="Andy Xie">
     <link rel="icon" href="favicon.ico">
 
-    <title>ShortMe</title>
+    <title>{{.Title}}</title>
 
     <!-- Bootstrap core CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha256-7s5uDGW3AHqw6xtJmNNtr+OBRJUlgkNJEo78P4b0yRw=" crossorigin="anonymous" />
@@ -44,7 +44,7 @@
       <nav class="navbar navbar-default">
         <div class="container-fluid">
           <div class="navbar-header">
-            <a class="navbar-brand" href="/index.html">ShortMe</a>
+            <a class="navbar-brand" href="/">{{.Title}}</a>
           </div><!--/.nav-collapse -->
         </div><!--/.container-fluid -->
       </nav>
@@ -70,7 +70,7 @@
       <div class="jumbotron">
           <div role="row">
               <div class="input-group">
-                  <input type="text" class="form-control text-center" id="shortURL" placeholder="Shortened URL. http://shortme.com/aB1">
+                  <input type="text" class="form-control text-center" id="shortURL" placeholder="Shortened URL. {{.ShortURL}}">
                   <div class="input-group-btn">
                       <button type="submit" class="btn btn-primary" onclick="Expand('shortURL')">Expand</button>
                   </div>

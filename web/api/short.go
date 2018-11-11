@@ -9,8 +9,8 @@ import (
 	"strings"
 
 	"github.com/gorilla/mux"
-	"github.com/yougg/shortme/conf"
-	"github.com/yougg/shortme/short"
+	"github.com/rasa/shortme/conf"
+	"github.com/rasa/shortme/short"
 )
 
 func Redirect(w http.ResponseWriter, r *http.Request) {
