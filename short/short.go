@@ -9,9 +9,9 @@ import (
 	"log"
 
 	"github.com/dchest/siphash"
-	"github.com/andyxning/shortme/base"
-	"github.com/andyxning/shortme/conf"
-	"github.com/andyxning/shortme/sequence"
+	"github.com/rasa/shortme/base"
+	"github.com/rasa/shortme/conf"
+	"github.com/rasa/shortme/sequence"
 	"github.com/go-sql-driver/mysql"
 	"github.com/minio/highwayhash"
 )
