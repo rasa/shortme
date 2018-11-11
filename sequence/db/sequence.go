@@ -10,7 +10,7 @@ import (
 )
 
 type SequenceDB struct {
-	db *sql.DB
+	db   *sql.DB
 	stmt *sql.Stmt
 }
 
@@ -44,9 +44,9 @@ func (dbSeq *SequenceDB) Open() (err error) {
 
 func (dbSeq *SequenceDB) Close() {
 	if dbSeq.stmt != nil {
-    dbSeq.stmt.Close()
-    dbSeq.stmt = nil
-  }
+		dbSeq.stmt.Close()
+		dbSeq.stmt = nil
+	}
 	if dbSeq.db != nil {
 		dbSeq.db.Close()
 		dbSeq.db = nil

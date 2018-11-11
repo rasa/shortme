@@ -22,16 +22,16 @@ const (
 	highwayhash_key_string = "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
 	siphash_k0             = uint64(316665572293978160)
 	siphash_k1             = uint64(8573005253291875333)
-  reconnect_tries        = 2
+	reconnect_tries        = 2
 )
 
 type shorter struct {
-	readDB   *sql.DB
-	writeDB  *sql.DB
-	sequence sequence.Sequence
-  selectLongStmt *sql.Stmt
-  selectShortStmt *sql.Stmt
-  insertStmt *sql.Stmt
+	readDB          *sql.DB
+	writeDB         *sql.DB
+	sequence        sequence.Sequence
+	selectLongStmt  *sql.Stmt
+	selectShortStmt *sql.Stmt
+	insertStmt      *sql.Stmt
 }
 
 var (
@@ -79,16 +79,16 @@ func (shorter *shorter) reconnectReadDB() {
 	db.SetMaxOpenConns(conf.Conf.ShortDB.MaxOpenConns)
 
 	shorter.readDB = db
-  
+
 	selectLongSQL := fmt.Sprintf(`SELECT long_url FROM short WHERE short_url=?`)
 	shorter.selectLongStmt, err = shorter.readDB.Prepare(selectLongSQL)
-  if err != nil {
+	if err != nil {
 		log.Panicf("sequence db prepare long error. %v", err)
 	}
 
 	selectShortSQL := fmt.Sprintf(`SELECT short_url FROM short WHERE long_hash=? and long_url=?`)
 	shorter.selectShortStmt, err = shorter.readDB.Prepare(selectShortSQL)
-  if err != nil {
+	if err != nil {
 		log.Panicf("sequence db prepare short error. %v", err)
 	}
 }
@@ -113,11 +113,11 @@ func (shorter *shorter) reconnectWriteDB() {
 	db.SetMaxOpenConns(conf.Conf.ShortDB.MaxOpenConns)
 
 	shorter.writeDB = db
-  
+
 	insertSQL := fmt.Sprintf(`INSERT INTO short(long_url, short_url, long_hash) VALUES(?, ?, ?)`)
 
 	shorter.insertStmt, err = shorter.writeDB.Prepare(insertSQL)
-  if err != nil {
+	if err != nil {
 		log.Panicf("sequence db prepare error. %v", err)
 	}
 }
@@ -163,64 +163,64 @@ func (shorter *shorter) connectionError(err *error) bool {
 }
 
 func (shorter *shorter) Expand(shortURL string) (longURL string, err error) {
-  retry := 0
-  for retry < reconnect_tries {
-    err = shorter.selectLongStmt.QueryRow(shortURL).Scan(&longURL)
-		if err == nil || ! shorter.connectionError(&err) {
-      break
-    }    
-    shorter.reconnectReadDB()
-    retry += 1
-  }
+	retry := 0
+	for retry < reconnect_tries {
+		err = shorter.selectLongStmt.QueryRow(shortURL).Scan(&longURL)
+		if err == nil || !shorter.connectionError(&err) {
+			break
+		}
+		shorter.reconnectReadDB()
+		retry += 1
+	}
 	switch {
 	case err == sql.ErrNoRows:
 		log.Printf("No longURL found for %v", shortURL)
-    return "", nil
+		return "", nil
 	case err != nil:
-    log.Printf("short read db query error. %v", err)
-    return "", ErrQueryShortDB
-	} 
-  return longURL, nil
+		log.Printf("short read db query error. %v", err)
+		return "", ErrQueryShortDB
+	}
+	return longURL, nil
 
-/*
-	selectLongSQL := fmt.Sprintf(`SELECT long_url FROM short WHERE short_url=?`)
+	/*
+		selectLongSQL := fmt.Sprintf(`SELECT long_url FROM short WHERE short_url=?`)
 
-	var rows *sql.Rows
-	rows, err = shorter.readDB.Query(selectLongSQL, shortURL)
+		var rows *sql.Rows
+		rows, err = shorter.readDB.Query(selectLongSQL, shortURL)
 
-	if err != nil {
-		if shorter.connectionError(&err) {
-			shorter.reconnectReadDB()
+		if err != nil {
+			if shorter.connectionError(&err) {
+				shorter.reconnectReadDB()
 
-			rows, err = shorter.readDB.Query(selectLongSQL, shortURL)
-			if err != nil {
+				rows, err = shorter.readDB.Query(selectLongSQL, shortURL)
+				if err != nil {
+					log.Printf("short read db query error. %v", err)
+					return "", ErrQueryShortDB
+				}
+			} else {
 				log.Printf("short read db query error. %v", err)
 				return "", ErrQueryShortDB
 			}
-		} else {
-			log.Printf("short read db query error. %v", err)
-			return "", ErrQueryShortDB
 		}
-	}
 
-	defer rows.Close()
+		defer rows.Close()
 
-	for rows.Next() {
-		err = rows.Scan(&longURL)
+		for rows.Next() {
+			err = rows.Scan(&longURL)
+			if err != nil {
+				log.Printf("short read db query rows scan error. %v", err)
+				return "", ErrScanShortRows
+			}
+		}
+
+		err = rows.Err()
 		if err != nil {
-			log.Printf("short read db query rows scan error. %v", err)
-			return "", ErrScanShortRows
+			log.Printf("short read db query rows iterate error. %v", err)
+			return "", ErrIterShortRows
 		}
-	}
 
-	err = rows.Err()
-	if err != nil {
-		log.Printf("short read db query rows iterate error. %v", err)
-		return "", ErrIterShortRows
-	}
-
-	return longURL, nil
-*/
+		return longURL, nil
+	*/
 }
 
 func (shorter *shorter) Short(longURL string) (shortURL string, err error) {
@@ -237,17 +237,17 @@ func (shorter *shorter) Short(longURL string) (shortURL string, err error) {
 	} else {
 		long_hash = siphash.Hash(siphash_k0, siphash_k1, []byte(longURL))
 	}
-  
-  short_url := ""
-  retry := 0
-  for retry < reconnect_tries {
-    err = shorter.selectShortStmt.QueryRow(long_hash, longURL).Scan(&short_url)
-		if err == nil || ! shorter.connectionError(&err) {
-      break
-    }    
-    shorter.reconnectReadDB()
-    retry += 1
-  }
+
+	short_url := ""
+	retry := 0
+	for retry < reconnect_tries {
+		err = shorter.selectShortStmt.QueryRow(long_hash, longURL).Scan(&short_url)
+		if err == nil || !shorter.connectionError(&err) {
+			break
+		}
+		shorter.reconnectReadDB()
+		retry += 1
+	}
 
 	switch {
 	case err == sql.ErrNoRows:
@@ -255,60 +255,60 @@ func (shorter *shorter) Short(longURL string) (shortURL string, err error) {
 	case err != nil:
 		log.Printf("short read db query error. %v", err)
 		return "", errors.New("short read db query error")
-  default:
-    if short_url != "" {
-      return short_url, nil
-    }
-	}
-  
-/*
-	selectShortSQL := fmt.Sprintf(`SELECT short_url FROM short WHERE long_hash=? and long_url=?`)
-
-	var rows *sql.Rows
-	rows, err = shorter.readDB.Query(selectShortSQL, long_hash, longURL)
-	if err != nil {
-		log.Printf("short read db query error. %v", err)
-		return "", errors.New("short read db query error")
-	}
-
-	defer rows.Close()
-
-	short_url := ""
-	for rows.Next() {
-		err = rows.Scan(&short_url)
-		if err != nil {
-			log.Printf("short read db query rows scan error. %v", err)
-			return "", errors.New("short read db query rows scan error")
+	default:
+		if short_url != "" {
+			return short_url, nil
 		}
 	}
 
-	err = rows.Err()
-	if err != nil {
-		log.Printf("short read db query rows iterate error. %v", err)
-		return "", errors.New("short read db query rows iterate error")
-	}
+	/*
+		selectShortSQL := fmt.Sprintf(`SELECT short_url FROM short WHERE long_hash=? and long_url=?`)
 
-	if short_url != "" {
-		return short_url, nil
-	}
-*/
-  
+		var rows *sql.Rows
+		rows, err = shorter.readDB.Query(selectShortSQL, long_hash, longURL)
+		if err != nil {
+			log.Printf("short read db query error. %v", err)
+			return "", errors.New("short read db query error")
+		}
+
+		defer rows.Close()
+
+		short_url := ""
+		for rows.Next() {
+			err = rows.Scan(&short_url)
+			if err != nil {
+				log.Printf("short read db query rows scan error. %v", err)
+				return "", errors.New("short read db query rows scan error")
+			}
+		}
+
+		err = rows.Err()
+		if err != nil {
+			log.Printf("short read db query rows iterate error. %v", err)
+			return "", errors.New("short read db query rows iterate error")
+		}
+
+		if short_url != "" {
+			return short_url, nil
+		}
+	*/
+
 	for {
 		var seq uint64
 
-    retry := 0
-    for retry < reconnect_tries {
-      seq, err = shorter.sequence.NextSequence()
-      if err == nil || ! shorter.connectionError(&err) {
-        break
-      }    
-      shorter.reconnectSequence()
-      retry += 1
-    }
-    
+		retry := 0
+		for retry < reconnect_tries {
+			seq, err = shorter.sequence.NextSequence()
+			if err == nil || !shorter.connectionError(&err) {
+				break
+			}
+			shorter.reconnectSequence()
+			retry += 1
+		}
+
 		if err != nil {
-      log.Printf("get next sequence error. %v", err)
-      return "", ErrGetNextSeq
+			log.Printf("get next sequence error. %v", err)
+			return "", ErrGetNextSeq
 		}
 
 		shortURL = base.Int2String(seq)
@@ -317,41 +317,41 @@ func (shorter *shorter) Short(longURL string) (shortURL string, err error) {
 		}
 	}
 
-/*
-	insertSQL := fmt.Sprintf(`INSERT INTO short(long_url, short_url, long_hash) VALUES(?, ?, ?)`)
-	var stmt *sql.Stmt
-	stmt, err = shorter.writeDB.Prepare(insertSQL)
-	if err != nil {
-		if shorter.connectionError(&err) {
-			shorter.reconnectWriteDB()
+	/*
+		insertSQL := fmt.Sprintf(`INSERT INTO short(long_url, short_url, long_hash) VALUES(?, ?, ?)`)
+		var stmt *sql.Stmt
+		stmt, err = shorter.writeDB.Prepare(insertSQL)
+		if err != nil {
+			if shorter.connectionError(&err) {
+				shorter.reconnectWriteDB()
 
-			stmt, err = shorter.writeDB.Prepare(insertSQL)
-			if err != nil {
+				stmt, err = shorter.writeDB.Prepare(insertSQL)
+				if err != nil {
+					log.Printf("short write db prepares error. %v", err)
+					return "", ErrPrepareSQL
+				}
+			} else {
 				log.Printf("short write db prepares error. %v", err)
 				return "", ErrPrepareSQL
 			}
-		} else {
-			log.Printf("short write db prepares error. %v", err)
-			return "", ErrPrepareSQL
 		}
+		defer stmt.Close()
+	*/
+
+	retry = 0
+	for retry < reconnect_tries {
+		_, err = shorter.insertStmt.Exec(longURL, shortURL, long_hash)
+		if err == nil || !shorter.connectionError(&err) {
+			break
+		}
+		shorter.reconnectWriteDB()
+		retry += 1
 	}
-	defer stmt.Close()
-*/
 
-  retry = 0
-  for retry < reconnect_tries {
-    _, err = shorter.insertStmt.Exec(longURL, shortURL, long_hash)
-    if err == nil || ! shorter.connectionError(&err) {
-      break
-    }    
-    shorter.reconnectWriteDB()
-    retry += 1
-  }
-
-  if err != nil {
-    log.Printf("short write db insert error. %v", err)
-    return "", ErrInsertData
-  }
+	if err != nil {
+		log.Printf("short write db insert error. %v", err)
+		return "", ErrInsertData
+	}
 
 	return shortURL, nil
 }
