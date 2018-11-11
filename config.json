@@ -37,7 +37,7 @@
     "domain_name": "127.0.0.1:3030",
 
     "# Short url service schema: http or https.": "↓",
-    "schema": "http"
+    "schema": "http",
 
     "# Title of index.html.": "↓",
     "title": "ShortMe",
