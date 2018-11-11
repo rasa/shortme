@@ -38,5 +38,11 @@
 
     "# Short url service schema: http or https.": "↓",
     "schema": "http"
+
+    "# Title of index.html.": "↓",
+    "title": "ShortMe",
+
+    "# Example URL in index.html.": "↓",
+    "short_url": "127.0.0.1:3030/D"
   }
 }

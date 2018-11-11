@@ -4,6 +4,8 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+
+	"github.com/rasa/shortme/conf"
 )
 
 func Index(w http.ResponseWriter, _ *http.Request) {
@@ -17,13 +19,7 @@ func Index(w http.ResponseWriter, _ *http.Request) {
 		return
 	}
 
-	type Fields struct {
-		Title    string
-		ShortURL string
-	}
-	var fields = Fields{"yb.gd", "https://yb.gd/U"}
-
-	err = tpl.Execute(w, fields)
+	err = tpl.Execute(w, &conf.Conf.Common)
 	if err != nil {
 		log.Printf("execute template error. %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
