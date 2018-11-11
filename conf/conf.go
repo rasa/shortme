@@ -32,6 +32,8 @@ type common struct {
 	BaseStringLength  uint64          `json:"-"`
 	DomainName        string          `json:"domain_name"`
 	Schema            string          `json:"schema"`
+	Title             string          `json:"title"`
+	ShortURL          string          `json:"short_url"`
 }
 
 type config struct {

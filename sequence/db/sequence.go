@@ -11,6 +11,7 @@ import (
 
 type SequenceDB struct {
 	db *sql.DB
+	stmt *sql.Stmt
 }
 
 func (dbSeq *SequenceDB) Open() (err error) {
@@ -31,10 +32,21 @@ func (dbSeq *SequenceDB) Open() (err error) {
 	db.SetMaxOpenConns(conf.Conf.SequenceDB.MaxOpenConns)
 
 	dbSeq.db = db
+
+	dbSeq.stmt, err = dbSeq.db.Prepare(`UPDATE sequence SET id=LAST_INSERT_ID(id+1)`)
+	if err != nil {
+		log.Printf("sequence db prepare error. %v", err)
+		return err
+	}
+
 	return nil
 }
 
 func (dbSeq *SequenceDB) Close() {
+	if dbSeq.stmt != nil {
+    dbSeq.stmt.Close()
+    dbSeq.stmt = nil
+  }
 	if dbSeq.db != nil {
 		dbSeq.db.Close()
 		dbSeq.db = nil
@@ -42,16 +54,8 @@ func (dbSeq *SequenceDB) Close() {
 }
 
 func (dbSeq *SequenceDB) NextSequence() (sequence uint64, err error) {
-	var stmt *sql.Stmt
-	stmt, err = dbSeq.db.Prepare(`UPDATE sequence SET id=LAST_INSERT_ID(id+1)`)
-	if err != nil {
-		log.Printf("sequence db prepare error. %v", err)
-		return 0, err
-	}
-	defer stmt.Close()
-
 	var res sql.Result
-	res, err = stmt.Exec()
+	res, err = dbSeq.stmt.Exec()
 	if err != nil {
 		log.Printf("sequence db replace into error. %v", err)
 		return 0, err

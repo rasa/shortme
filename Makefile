@@ -1,10 +1,11 @@
 version = 1.2.0
 
 ifeq ($(OS),Windows_NT)
-	export PATH := "C:/cygwin/bin:$(PATH)"
+	FIND=C:/cygwin/bin/find.exe
 	EXTENSION=.exe
 else
-	EXTENSION=""
+	FIND=find
+	EXTENSION=
 endif
 
 dep:
@@ -17,10 +18,10 @@ vet:
 	go list ./... | grep -v "./vendor*" | xargs go vet
 
 fmt: 
-	find . -type f -name "*.go" | grep -v "./vendor*" | xargs gofmt -s -w
+	$(FIND) . -type f -name "*.go" | grep -v "./vendor*" | xargs gofmt -s -w
 
 build: dep vet fmt
-	go build -ldflags="-X github.com/andyxning/shortme/conf.Version=$(version)" -o shortme$(EXTENSION) main.go
+	go build -ldflags="-X github.com/rasa/shortme/conf.Version=$(version)" -o shortme$(EXTENSION) main.go
 
 clean:
 	rm -f shortme

@@ -22,12 +22,16 @@ const (
 	highwayhash_key_string = "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
 	siphash_k0             = uint64(316665572293978160)
 	siphash_k1             = uint64(8573005253291875333)
+  reconnect_tries        = 2
 )
 
 type shorter struct {
 	readDB   *sql.DB
 	writeDB  *sql.DB
 	sequence sequence.Sequence
+  selectLongStmt *sql.Stmt
+  selectShortStmt *sql.Stmt
+  insertStmt *sql.Stmt
 }
 
 var (
@@ -75,6 +79,18 @@ func (shorter *shorter) reconnectReadDB() {
 	db.SetMaxOpenConns(conf.Conf.ShortDB.MaxOpenConns)
 
 	shorter.readDB = db
+  
+	selectLongSQL := fmt.Sprintf(`SELECT long_url FROM short WHERE short_url=?`)
+	shorter.selectLongStmt, err = shorter.readDB.Prepare(selectLongSQL)
+  if err != nil {
+		log.Panicf("sequence db prepare long error. %v", err)
+	}
+
+	selectShortSQL := fmt.Sprintf(`SELECT short_url FROM short WHERE long_hash=? and long_url=?`)
+	shorter.selectShortStmt, err = shorter.readDB.Prepare(selectShortSQL)
+  if err != nil {
+		log.Panicf("sequence db prepare short error. %v", err)
+	}
 }
 
 func (shorter *shorter) reconnectWriteDB() {
@@ -97,6 +113,13 @@ func (shorter *shorter) reconnectWriteDB() {
 	db.SetMaxOpenConns(conf.Conf.ShortDB.MaxOpenConns)
 
 	shorter.writeDB = db
+  
+	insertSQL := fmt.Sprintf(`INSERT INTO short(long_url, short_url, long_hash) VALUES(?, ?, ?)`)
+
+	shorter.insertStmt, err = shorter.writeDB.Prepare(insertSQL)
+  if err != nil {
+		log.Panicf("sequence db prepare error. %v", err)
+	}
 }
 
 // initSequence will panic when it can not open the sequence successfully.
@@ -140,16 +163,36 @@ func (shorter *shorter) connectionError(err *error) bool {
 }
 
 func (shorter *shorter) Expand(shortURL string) (longURL string, err error) {
-	selectSQL := fmt.Sprintf(`SELECT long_url FROM short WHERE short_url=?`)
+  retry := 0
+  for retry < reconnect_tries {
+    err = shorter.selectLongStmt.QueryRow(shortURL).Scan(&longURL)
+		if err == nil || ! shorter.connectionError(&err) {
+      break
+    }    
+    shorter.reconnectReadDB()
+    retry += 1
+  }
+	switch {
+	case err == sql.ErrNoRows:
+		log.Printf("No longURL found for %v", shortURL)
+    return "", nil
+	case err != nil:
+    log.Printf("short read db query error. %v", err)
+    return "", ErrQueryShortDB
+	} 
+  return longURL, nil
+
+/*
+	selectLongSQL := fmt.Sprintf(`SELECT long_url FROM short WHERE short_url=?`)
 
 	var rows *sql.Rows
-	rows, err = shorter.readDB.Query(selectSQL, shortURL)
+	rows, err = shorter.readDB.Query(selectLongSQL, shortURL)
 
 	if err != nil {
 		if shorter.connectionError(&err) {
 			shorter.reconnectReadDB()
 
-			rows, err = shorter.readDB.Query(selectSQL, shortURL)
+			rows, err = shorter.readDB.Query(selectLongSQL, shortURL)
 			if err != nil {
 				log.Printf("short read db query error. %v", err)
 				return "", ErrQueryShortDB
@@ -177,6 +220,7 @@ func (shorter *shorter) Expand(shortURL string) (longURL string, err error) {
 	}
 
 	return longURL, nil
+*/
 }
 
 func (shorter *shorter) Short(longURL string) (shortURL string, err error) {
@@ -193,10 +237,35 @@ func (shorter *shorter) Short(longURL string) (shortURL string, err error) {
 	} else {
 		long_hash = siphash.Hash(siphash_k0, siphash_k1, []byte(longURL))
 	}
-	selectSQL := fmt.Sprintf(`SELECT short_url FROM short WHERE long_hash=? and long_url=?`)
+  
+  short_url := ""
+  retry := 0
+  for retry < reconnect_tries {
+    err = shorter.selectShortStmt.QueryRow(long_hash, longURL).Scan(&short_url)
+		if err == nil || ! shorter.connectionError(&err) {
+      break
+    }    
+    shorter.reconnectReadDB()
+    retry += 1
+  }
+
+	switch {
+	case err == sql.ErrNoRows:
+		log.Printf("No shortURL found for %v (%v)", long_hash, longURL)
+	case err != nil:
+		log.Printf("short read db query error. %v", err)
+		return "", errors.New("short read db query error")
+  default:
+    if short_url != "" {
+      return short_url, nil
+    }
+	}
+  
+/*
+	selectShortSQL := fmt.Sprintf(`SELECT short_url FROM short WHERE long_hash=? and long_url=?`)
 
 	var rows *sql.Rows
-	rows, err = shorter.readDB.Query(selectSQL, long_hash, longURL)
+	rows, err = shorter.readDB.Query(selectShortSQL, long_hash, longURL)
 	if err != nil {
 		log.Printf("short read db query error. %v", err)
 		return "", errors.New("short read db query error")
@@ -222,23 +291,24 @@ func (shorter *shorter) Short(longURL string) (shortURL string, err error) {
 	if short_url != "" {
 		return short_url, nil
 	}
-
+*/
+  
 	for {
 		var seq uint64
-		seq, err = shorter.sequence.NextSequence()
-		if err != nil {
-			if shorter.connectionError(&err) {
-				shorter.reconnectSequence()
 
-				seq, err = shorter.sequence.NextSequence()
-				if err != nil {
-					log.Printf("get next sequence error. %v", err)
-					return "", ErrGetNextSeq
-				}
-			} else {
-				log.Printf("get next sequence error. %v", err)
-				return "", ErrGetNextSeq
-			}
+    retry := 0
+    for retry < reconnect_tries {
+      seq, err = shorter.sequence.NextSequence()
+      if err == nil || ! shorter.connectionError(&err) {
+        break
+      }    
+      shorter.reconnectSequence()
+      retry += 1
+    }
+    
+		if err != nil {
+      log.Printf("get next sequence error. %v", err)
+      return "", ErrGetNextSeq
 		}
 
 		shortURL = base.Int2String(seq)
@@ -247,8 +317,8 @@ func (shorter *shorter) Short(longURL string) (shortURL string, err error) {
 		}
 	}
 
+/*
 	insertSQL := fmt.Sprintf(`INSERT INTO short(long_url, short_url, long_hash) VALUES(?, ?, ?)`)
-
 	var stmt *sql.Stmt
 	stmt, err = shorter.writeDB.Prepare(insertSQL)
 	if err != nil {
@@ -266,22 +336,22 @@ func (shorter *shorter) Short(longURL string) (shortURL string, err error) {
 		}
 	}
 	defer stmt.Close()
+*/
 
-	_, err = stmt.Exec(longURL, shortURL, long_hash)
-	if err != nil {
-		if shorter.connectionError(&err) {
-			shorter.reconnectWriteDB()
+  retry = 0
+  for retry < reconnect_tries {
+    _, err = shorter.insertStmt.Exec(longURL, shortURL, long_hash)
+    if err == nil || ! shorter.connectionError(&err) {
+      break
+    }    
+    shorter.reconnectWriteDB()
+    retry += 1
+  }
 
-			_, err = stmt.Exec(longURL, shortURL)
-			if err != nil {
-				log.Printf("short write db insert error. %v", err)
-				return "", ErrInsertData
-			}
-		} else {
-			log.Printf("short write db insert error. %v", err)
-			return "", ErrInsertData
-		}
-	}
+  if err != nil {
+    log.Printf("short write db insert error. %v", err)
+    return "", ErrInsertData
+  }
 
 	return shortURL, nil
 }
