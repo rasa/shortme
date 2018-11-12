@@ -1,7 +1,6 @@
 package base
 
 import (
-	"math"
 	"strings"
 
 	"github.com/rasa/shortme/conf"
