@@ -19,7 +19,7 @@ func Redirect(w http.ResponseWriter, r *http.Request) {
 
 	longURL, err := short.Shorter.Expand(shortededURL)
 	if err != nil {
-		log.Printf("redirect short url error. %v", err)
+		log.Printf("Failed to redirect %v: %v", shortededURL, err)
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(http.StatusText(http.StatusInternalServerError)))
 		return
@@ -38,7 +38,7 @@ func ShortURL(w http.ResponseWriter, r *http.Request) {
 
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		log.Printf("read short request error. %v", err)
+		log.Printf("Read short request error: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		errMsg, _ := json.Marshal(errorResp{Msg: http.StatusText(http.StatusInternalServerError)})
 		w.Write(errMsg)
@@ -48,7 +48,7 @@ func ShortURL(w http.ResponseWriter, r *http.Request) {
 	var shortReq shortReq
 	err = json.Unmarshal(body, &shortReq)
 	if err != nil {
-		log.Printf("parse short request error. %v", err)
+		log.Printf("Parse short request error: %v", err)
 		w.WriteHeader(http.StatusBadRequest)
 		errMsg, _ := json.Marshal(errorResp{Msg: http.StatusText(http.StatusBadRequest)})
 		w.Write(errMsg)
@@ -101,7 +101,7 @@ func ShortURL(w http.ResponseWriter, r *http.Request) {
 		Path:   shortenedURL,
 	}).String()
 	if err != nil {
-		log.Printf("short url error. %v", err)
+		log.Printf("Short url error: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		errMsg, _ := json.Marshal(errorResp{Msg: http.StatusText(http.StatusInternalServerError)})
 		w.Write(errMsg)
@@ -116,7 +116,7 @@ func ExpandURL(w http.ResponseWriter, r *http.Request) {
 
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		log.Printf("read expand request error. %v", err)
+		log.Printf("Read expand request error: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		errMsg, _ := json.Marshal(errorResp{Msg: http.StatusText(http.StatusInternalServerError)})
 		w.Write(errMsg)
@@ -126,7 +126,7 @@ func ExpandURL(w http.ResponseWriter, r *http.Request) {
 	var expandReq expandReq
 	err = json.Unmarshal(body, &expandReq)
 	if err != nil {
-		log.Printf("parse expand request error. %v", err)
+		log.Printf("Parse expand request error: %v", err)
 		w.WriteHeader(http.StatusBadRequest)
 		errMsg, _ := json.Marshal(errorResp{Msg: http.StatusText(http.StatusBadRequest)})
 		w.Write(errMsg)
@@ -136,7 +136,7 @@ func ExpandURL(w http.ResponseWriter, r *http.Request) {
 	var shortURL *url.URL
 	shortURL, err = url.Parse(expandReq.ShortURL)
 	if err != nil {
-		log.Printf(`"%v" is not a valid url`, expandReq.ShortURL)
+		log.Printf(`Invalid URL: "%v"`, expandReq.ShortURL)
 		w.WriteHeader(http.StatusBadRequest)
 		errMsg, _ := json.Marshal(errorResp{Msg: http.StatusText(http.StatusBadRequest)})
 		w.Write(errMsg)
@@ -145,7 +145,7 @@ func ExpandURL(w http.ResponseWriter, r *http.Request) {
 		var expandedURL string
 		expandedURL, err = short.Shorter.Expand(strings.TrimLeft(shortURL.Path, "/"))
 		if err != nil {
-			log.Printf("expand url error. %v", err)
+			log.Printf("Failed to expand %v: %v", shortURL.Path, err)
 			w.WriteHeader(http.StatusInternalServerError)
 			errMsg, _ := json.Marshal(errorResp{Msg: http.StatusText(http.StatusInternalServerError)})
 			w.Write(errMsg)
