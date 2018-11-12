@@ -56,35 +56,41 @@ func ShortURL(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var longURL *url.URL
+	shortReq.LongURL = strings.TrimSpace(shortReq.LongURL)
+	lower := strings.ToLower(shortReq.LongURL)
+
+	if !strings.HasPrefix(lower, "http://") && !strings.HasPrefix(lower, "https://") {
+		if !strings.HasPrefix(shortReq.LongURL, "//") {
+			shortReq.LongURL = "//" + shortReq.LongURL
+		}
+		shortReq.LongURL = "http:" + shortReq.LongURL
+	}
 	longURL, err = url.Parse(shortReq.LongURL)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		errMsg, _ := json.Marshal(errorResp{Msg: "requested url is malformed"})
 		w.Write(errMsg)
 		return
-	} else {
-		if longURL.Host == "" {
-			w.WriteHeader(http.StatusBadRequest)
-			errMsg, _ := json.Marshal(errorResp{Msg: "requested url is malformed"})
-			w.Write(errMsg)
-			return
-		}
+	}
 
-		if strings.ToLower(longURL.Host) == strings.ToLower(conf.Conf.Common.DomainName) {
-			w.WriteHeader(http.StatusBadRequest)
-			errMsg, _ := json.Marshal(errorResp{Msg: "requested url is already shortened"})
-			w.Write(errMsg)
-			return
-		}
-		if longURL.Scheme == "" {
-			longURL.Scheme = "https"
-		}
-		if strings.ToLower(longURL.Scheme) != "http" && strings.ToLower(longURL.Scheme) != "https" {
-			w.WriteHeader(http.StatusBadRequest)
-			errMsg, _ := json.Marshal(errorResp{Msg: "requested url is not a http or https url"})
-			w.Write(errMsg)
-			return
-		}
+	if longURL.Host == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		errMsg, _ := json.Marshal(errorResp{Msg: "requested url is malformed"})
+		w.Write(errMsg)
+		return
+	}
+
+	if strings.ToLower(longURL.Host) == strings.ToLower(conf.Conf.Common.DomainName) {
+		w.WriteHeader(http.StatusBadRequest)
+		errMsg, _ := json.Marshal(errorResp{Msg: "requested url is already shortened"})
+		w.Write(errMsg)
+		return
+	}
+	if strings.ToLower(longURL.Scheme) != "http" && strings.ToLower(longURL.Scheme) != "https" {
+		w.WriteHeader(http.StatusBadRequest)
+		errMsg, _ := json.Marshal(errorResp{Msg: "requested url is not a http or https url"})
+		w.Write(errMsg)
+		return
 	}
 
 	var shortenedURL string
@@ -100,10 +106,9 @@ func ShortURL(w http.ResponseWriter, r *http.Request) {
 		errMsg, _ := json.Marshal(errorResp{Msg: http.StatusText(http.StatusInternalServerError)})
 		w.Write(errMsg)
 		return
-	} else {
-		shortResp, _ := json.Marshal(shortResp{ShortURL: shortenedURL})
-		w.Write(shortResp)
 	}
+	shortResp, _ := json.Marshal(shortResp{ShortURL: shortenedURL})
+	w.Write(shortResp)
 }
 
 func ExpandURL(w http.ResponseWriter, r *http.Request) {
