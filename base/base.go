@@ -10,8 +10,9 @@ import (
 var base [10]uint64
 
 func Init() {
+	base[0] = 1
 	for i := 1; i < len(base); i++ {
-		base[i] = uint64(math.Pow(float64(conf.Conf.Common.BaseStringLength), float64(i)))
+		base[i] = base[i-1] * uint64(conf.Conf.Common.BaseStringLength)
 	}
 }
 
