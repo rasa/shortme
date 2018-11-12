@@ -66,7 +66,7 @@ func MustParseConfig(configFile string) {
 
 	err = json.Unmarshal(content, &Conf)
 	if err != nil {
-		log.Panicf("unmarshal toml object error. %v", err)
+		log.Panicf("unmarshal json object error. %v", err)
 	}
 
 	// short url black list
