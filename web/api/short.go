@@ -63,11 +63,21 @@ func ShortURL(w http.ResponseWriter, r *http.Request) {
 		w.Write(errMsg)
 		return
 	} else {
-		if longURL.Host == conf.Conf.Common.DomainName {
+		if longURL.Host == "" {
+			w.WriteHeader(http.StatusBadRequest)
+			errMsg, _ := json.Marshal(errorResp{Msg: "requested url is malformed"})
+			w.Write(errMsg)
+			return
+		}
+
+		if strings.ToLower(longURL.Host) == strings.ToLower(conf.Conf.Common.DomainName) {
 			w.WriteHeader(http.StatusBadRequest)
 			errMsg, _ := json.Marshal(errorResp{Msg: "requested url is already shortened"})
 			w.Write(errMsg)
 			return
+		}
+		if longURL.Scheme == "" {
+			longURL.Scheme = "https"
 		}
 		if strings.ToLower(longURL.Scheme) != "http" && strings.ToLower(longURL.Scheme) != "https" {
 			w.WriteHeader(http.StatusBadRequest)
