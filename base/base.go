@@ -7,6 +7,14 @@ import (
 	"github.com/rasa/shortme/conf"
 )
 
+var base [10]uint64
+
+func Init() {
+	for i := 1; i < len(base); i++ {
+		base[i] := uint64(math.Pow(float64(conf.Conf.Common.BaseStringLength), float64(i)))
+	}
+}
+
 // Int2String converts an unsigned 64bit integer to a string.
 func Int2String(seq uint64) (shortURL string) {
 	var charSeq []rune
@@ -30,8 +38,7 @@ func Int2String(seq uint64) (shortURL string) {
 func String2Int(shortURL string) (seq uint64) {
 	shortURL = reverse(shortURL)
 	for index, char := range shortURL {
-		base := uint64(math.Pow(float64(conf.Conf.Common.BaseStringLength), float64(index)))
-		seq += uint64(strings.Index(conf.Conf.Common.BaseString, string(char))) * base
+		seq += uint64(strings.Index(conf.Conf.Common.BaseString, string(char))) * base[index]
 	}
 	return
 }
