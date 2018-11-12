@@ -12,7 +12,7 @@ import (
 
 func Start() {
 	log.Println("web starts")
-  www.Init()
+	www.Init()
 	r := mux.NewRouter()
 
 	r.HandleFunc("/version", api.CheckVersion).Methods(http.MethodGet)

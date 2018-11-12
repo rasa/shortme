@@ -1,7 +1,7 @@
 package www
 
 import (
-  "bytes"
+	"bytes"
 	"html/template"
 	"log"
 	"net/http"
@@ -26,10 +26,10 @@ func Init() {
 }
 
 func Index(w http.ResponseWriter, _ *http.Request) {
-  if bb.Len() == 0 {
+	if bb.Len() == 0 {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(http.StatusText(http.StatusInternalServerError)))
 		return
-  }
-  w.Write(bb.Bytes())
+	}
+	w.Write(bb.Bytes())
 }
