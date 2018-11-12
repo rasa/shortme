@@ -11,7 +11,7 @@ var base [10]uint64
 
 func Init() {
 	for i := 1; i < len(base); i++ {
-		base[i] := uint64(math.Pow(float64(conf.Conf.Common.BaseStringLength), float64(i)))
+		base[i] = uint64(math.Pow(float64(conf.Conf.Common.BaseStringLength), float64(i)))
 	}
 }
 

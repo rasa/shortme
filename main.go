@@ -28,7 +28,7 @@ func main() {
 	conf.MustParseConfig(*cfgFile)
 
 	base.Init()
-	
+
 	// short service
 	short.Start()
 
