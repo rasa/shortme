@@ -7,6 +7,8 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"net/url"
+	"strings"
 
 	"github.com/dchest/siphash"
 	"github.com/go-sql-driver/mysql"
@@ -225,6 +227,28 @@ func (shorter *shorter) Expand(shortURL string) (longURL string, err error) {
 
 func (shorter *shorter) Short(longURL string) (shortURL string, err error) {
 	var long_hash uint64
+	var u *url.URL
+
+	longURL = strings.TrimSpace(longURL)
+	u, err = url.Parse(longURL)
+	if err != nil {
+		log.Printf("URL parse error %v: %v", err, longURL)
+		return "", err
+	}
+	if u.Scheme == "" {
+		u.Scheme = "https"
+	}
+	u.Scheme = strings.ToLower(u.Scheme)
+	if u.Scheme != "http" && u.Scheme != "https" {
+		log.Printf("URL bad scheme: %v", longURL)
+		return "", errors.New("Bad scheme")
+	}
+	if u.Host == "" {
+		log.Printf("URL bad host: %v", longURL)
+		return "", errors.New("Bad host")
+	}
+	u.Host = strings.ToLower(u.Host)
+	longURL = u.String()
 
 	if UseHighwayHash {
 		hash, err := highwayhash.New64(highwayhash_key)
