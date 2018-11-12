@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/rasa/shortme/base"
 	"github.com/rasa/shortme/conf"
 	"github.com/rasa/shortme/short"
 	"github.com/rasa/shortme/web"
@@ -26,8 +25,6 @@ func main() {
 
 	// parse config
 	conf.MustParseConfig(*cfgFile)
-
-	base.Init()
 
 	// short service
 	short.Start()
