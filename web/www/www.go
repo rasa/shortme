@@ -11,7 +11,7 @@ import (
 
 const (
 	html          = "index.html"
-	template_html = "template" + html
+	template_html = "template/" + html
 )
 
 var bb bytes.Buffer
