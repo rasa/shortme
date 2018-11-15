@@ -9,19 +9,24 @@ import (
 	"github.com/rasa/shortme/conf"
 )
 
+const (
+	html          = "index.html"
+	template_html = "template" + html
+)
+
 var bb bytes.Buffer
 
 func Init() {
-	tpl := template.New("index.html")
+	tpl := template.New(html)
 	var err error
-	tpl, err = tpl.ParseFiles("template/index.html")
+	tpl, err = tpl.ParseFiles(template_html)
 	if err != nil {
-		log.Fatalf("parse template error. %v", err)
+		log.Fatalf("Failed to parse %v: %v", template_html, err)
 	}
 
 	err = tpl.Execute(&bb, &conf.Conf.Common)
 	if err != nil {
-		log.Fatalf("execute template error. %v", err)
+		log.Fatalf("Failed to execute %v: %v", template_html, err)
 	}
 }
 

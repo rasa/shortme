@@ -43,6 +43,9 @@
     "title": "ShortMe",
 
     "# Example URL in index.html.": "↓",
-    "short_url": "127.0.0.1:3030/D"
+    "short_url": "127.0.0.1:3030/D",
+    
+    "# Maximum length of short_url": "↓",
+    "short_url_max": 255    
   }
 }

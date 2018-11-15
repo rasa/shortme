@@ -23,13 +23,13 @@ func Redirect(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(http.StatusText(http.StatusInternalServerError)))
 		return
+	}
+
+	if len(longURL) != 0 {
+		w.Header().Set("Location", longURL)
+		w.WriteHeader(http.StatusTemporaryRedirect)
 	} else {
-		if len(longURL) != 0 {
-			w.Header().Set("Location", longURL)
-			w.WriteHeader(http.StatusTemporaryRedirect)
-		} else {
-			w.WriteHeader(http.StatusNoContent)
-		}
+		w.WriteHeader(http.StatusNoContent)
 	}
 }
 
@@ -95,11 +95,6 @@ func ShortURL(w http.ResponseWriter, r *http.Request) {
 
 	var shortenedURL string
 	shortenedURL, err = short.Shorter.Short(shortReq.LongURL)
-	shortenedURL = (&url.URL{
-		Scheme: conf.Conf.Common.Schema,
-		Host:   conf.Conf.Common.DomainName,
-		Path:   shortenedURL,
-	}).String()
 	if err != nil {
 		log.Printf("Short url error: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -107,6 +102,11 @@ func ShortURL(w http.ResponseWriter, r *http.Request) {
 		w.Write(errMsg)
 		return
 	}
+	shortenedURL = (&url.URL{
+		Scheme: conf.Conf.Common.Schema,
+		Host:   conf.Conf.Common.DomainName,
+		Path:   shortenedURL,
+	}).String()
 	shortResp, _ := json.Marshal(shortResp{ShortURL: shortenedURL})
 	w.Write(shortResp)
 }
@@ -141,18 +141,18 @@ func ExpandURL(w http.ResponseWriter, r *http.Request) {
 		errMsg, _ := json.Marshal(errorResp{Msg: http.StatusText(http.StatusBadRequest)})
 		w.Write(errMsg)
 		return
-	} else {
-		var expandedURL string
-		expandedURL, err = short.Shorter.Expand(strings.TrimLeft(shortURL.Path, "/"))
-		if err != nil {
-			log.Printf("Failed to expand %v: %v", shortURL.Path, err)
-			w.WriteHeader(http.StatusInternalServerError)
-			errMsg, _ := json.Marshal(errorResp{Msg: http.StatusText(http.StatusInternalServerError)})
-			w.Write(errMsg)
-			return
-		} else {
-			expandResp, _ := json.Marshal(expandResp{LongURL: expandedURL})
-			w.Write(expandResp)
-		}
 	}
+
+	var expandedURL string
+	expandedURL, err = short.Shorter.Expand(strings.TrimLeft(shortURL.Path, "/"))
+	if err != nil {
+		log.Printf("Failed to expand %v: %v", shortURL.Path, err)
+		w.WriteHeader(http.StatusInternalServerError)
+		errMsg, _ := json.Marshal(errorResp{Msg: http.StatusText(http.StatusInternalServerError)})
+		w.Write(errMsg)
+		return
+	}
+
+	expandResp, _ := json.Marshal(expandResp{LongURL: expandedURL})
+	w.Write(expandResp)
 }

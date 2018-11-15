@@ -1,8 +1,10 @@
 package web
 
 import (
+	"fmt"
 	"log"
 	"net/http"
+	"regexp"
 
 	"github.com/gorilla/mux"
 	"github.com/rasa/shortme/conf"
@@ -12,6 +14,7 @@ import (
 
 func Start() {
 	log.Println("web starts")
+	api.Init()
 	www.Init()
 	r := mux.NewRouter()
 
@@ -19,7 +22,6 @@ func Start() {
 	r.HandleFunc("/health", api.CheckHealth).Methods(http.MethodGet)
 	r.HandleFunc("/short", api.ShortURL).Methods(http.MethodPost).HeadersRegexp("Content-Type", "application/json")
 	r.HandleFunc("/expand", api.ExpandURL).Methods(http.MethodPost).HeadersRegexp("Content-Type", "application/json")
-	r.HandleFunc("/{shortenedURL:[a-zA-Z0-9]{1,11}}", api.Redirect).Methods(http.MethodGet)
 
 	r.HandleFunc("/", www.Index).Methods(http.MethodGet)
 	r.HandleFunc("/index.html", www.Index).Methods(http.MethodGet)
@@ -27,6 +29,10 @@ func Start() {
 	r.Handle("/static/{type}/{file}", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 	r.Handle("/favicon.ico", http.StripPrefix("/", http.FileServer(http.Dir("."))))
 	r.Handle("/robots.txt", http.StripPrefix("/", http.FileServer(http.Dir("."))))
+
+	shortenedURL := fmt.Sprintf("/{shortenedURL:[%v]{1,%v}}", regexp.QuoteMeta(conf.Conf.Common.BaseString), conf.Conf.Common.ShortURLMax)
+
+	r.HandleFunc(shortenedURL, api.Redirect).Methods(http.MethodGet)
 
 	log.Fatal(http.ListenAndServe(conf.Conf.Http.Listen, r))
 }
