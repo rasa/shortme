@@ -18,7 +18,7 @@ func (dbSeq *SequenceDB) Open() (err error) {
 	var db *sql.DB
 	db, err = sql.Open("mysql", conf.Conf.SequenceDB.DSN)
 	if err != nil {
-		log.Printf("sequence db open error. %v", err)
+		log.Printf("Sequence db open error: %v", err)
 		return err
 	}
 
@@ -35,7 +35,7 @@ func (dbSeq *SequenceDB) Open() (err error) {
 
 	dbSeq.stmt, err = dbSeq.db.Prepare(`UPDATE sequence SET id=LAST_INSERT_ID(id+1)`)
 	if err != nil {
-		log.Printf("sequence db prepare error. %v", err)
+		log.Printf("Sequence db prepare error: %v", err)
 		return err
 	}
 
@@ -57,7 +57,7 @@ func (dbSeq *SequenceDB) NextSequence() (sequence uint64, err error) {
 	var res sql.Result
 	res, err = dbSeq.stmt.Exec()
 	if err != nil {
-		log.Printf("sequence db replace into error. %v", err)
+		log.Printf("Sequence db update error: %v", err)
 		return 0, err
 	}
 
@@ -65,15 +65,15 @@ func (dbSeq *SequenceDB) NextSequence() (sequence uint64, err error) {
 	var lastID int64
 	lastID, err = res.LastInsertId()
 	if err != nil {
-		log.Printf("sequence db get LastInsertId error. %v", err)
+		log.Printf("Sequence db LastInsertId error: %v", err)
 		return 0, err
-	} else {
-		sequence = uint64(lastID)
-		// mysql sequence will start at 1, we actually want it to be
-		// started at 0. :)
-		sequence -= 1
-		return sequence, nil
 	}
+
+	sequence = uint64(lastID)
+	// mysql sequence will start at 1, we actually want it to be
+	// started at 0. :)
+	sequence -= 1
+	return sequence, nil
 }
 
 var dbSeq = SequenceDB{}

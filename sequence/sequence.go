@@ -2,6 +2,7 @@ package sequence
 
 import (
 	"fmt"
+	"log"
 	"sort"
 	"sync"
 )
@@ -46,11 +47,11 @@ func MustRegister(sequenceType string, sequence Sequence) {
 	defer sequencesMu.Unlock()
 
 	if sequence == nil {
-		panic("sequence: Registered sequence is nil")
+		log.Panic("sequence: Registered sequence is nil")
 	}
 
 	if _, dup := sequences[sequenceType]; dup {
-		panic("sequence: Register called twice for driver " + sequenceType)
+		log.Panic("sequence: Register called twice for driver " + sequenceType)
 	}
 
 	sequences[sequenceType] = sequence
