@@ -3,9 +3,16 @@ package conf
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
+	"regexp"
+	"strings"
+)
+
+const (
+	ValidURLChars = "0-9A-Za-z$_.+!*'(),-"
 )
 
 type sequenceDB struct {
@@ -34,6 +41,7 @@ type common struct {
 	Schema            string          `json:"schema"`
 	Title             string          `json:"title"`
 	ShortURL          string          `json:"short_url"`
+	ShortURLMax       uint64          `json:"short_url_max"`
 }
 
 type config struct {
@@ -48,28 +56,29 @@ var Conf config
 func MustParseConfig(configFile string) {
 	if fileInfo, err := os.Stat(configFile); err != nil {
 		if os.IsNotExist(err) {
-			log.Panicf("configuration file %v does not exist.", configFile)
+			log.Panicf("File not found: %v", configFile)
 		} else {
-			log.Panicf("configuration file %v can not be stated. %v", configFile, err)
+			log.Panicf("File not readable: %v: %v", configFile, err)
 		}
 	} else {
 		if fileInfo.IsDir() {
-			log.Panicf("%v is a directory name", configFile)
+			log.Panicf("File is a directory: %v", configFile)
 		}
 	}
 
 	content, err := ioutil.ReadFile(configFile)
 	if err != nil {
-		log.Panicf("read configuration file error. %v", err)
+		log.Panicf("Cannot read %v", err)
 	}
 	content = bytes.TrimSpace(content)
 
 	err = json.Unmarshal(content, &Conf)
 	if err != nil {
-		log.Panicf("unmarshal json object error. %v", err)
+		log.Panicf("Read error unmarshaling %v: %v", configFile, err)
 	}
 
 	// short url black list
+	// @todo add files: index.html, favicon.ico, robots.txt, etc
 	Conf.Common.BlackShortURLsMap = make(map[string]bool)
 	for _, blackShortURL := range Conf.Common.BlackShortURLs {
 		Conf.Common.BlackShortURLsMap[blackShortURL] = true
@@ -77,4 +86,19 @@ func MustParseConfig(configFile string) {
 
 	// base string
 	Conf.Common.BaseStringLength = uint64(len(Conf.Common.BaseString))
+
+	s := fmt.Sprintf("[^%v]+", regexp.QuoteMeta(ValidURLChars))
+	log.Printf(s)
+	re := regexp.MustCompile(s)
+
+	if re.MatchString(Conf.Common.BaseString) {
+		log.Panicf("base_string in %s contains invalid URL characters: %q", configFile, re.FindString(Conf.Common.BaseString))
+	}
+
+	for _, char := range Conf.Common.BaseString {
+		s := string(char)
+		if strings.Count(Conf.Common.BaseString, s) > 1 {
+			log.Panicf("base_string in %s contains %d instances of %s", configFile, strings.Count(Conf.Common.BaseString, s), s)
+		}
+	}
 }
