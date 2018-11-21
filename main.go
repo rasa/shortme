@@ -26,6 +26,11 @@ func main() {
 	// parse config
 	conf.MustParseConfig(*cfgFile)
 
+	_, err := os.Stat("local.json")
+	if err == nil {
+		conf.MustParseConfig("local.json")
+	}
+
 	// short service
 	short.Start()
 
