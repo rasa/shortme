@@ -2,14 +2,27 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <title>{{.Title}}</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" href="/favicon.png">
     <meta name="description" content="Yet Another URL Shortening Service in Golang">
     <meta name="author" content="Andy Xie">
-    <link rel="icon" href="favicon.ico">
+    
+    <!-- Apple Touch Icon (at least 200x200px) -->
+    <link rel="apple-touch-icon" href="/custom-icon.png">
 
-    <title>{{.Title}}</title>
+    <!-- To run web application in full-screen -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+
+    <!-- Status Bar Style (see Supported Meta Tags below for available values) -->
+    <!-- Has no effect unless you have the previous meta tag -->
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    
+    <!-- Microsoft Tiles -->
+    <meta name="msapplication-config" content="browserconfig.xml" />
 
     <!-- Bootstrap core CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha256-7s5uDGW3AHqw6xtJmNNtr+OBRJUlgkNJEo78P4b0yRw=" crossorigin="anonymous" />
@@ -91,6 +104,7 @@
     <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
     <script src="https://maxcdn.bootstrapcdn.com/js/ie10-viewport-bug-workaround.js"></script>
     <script>
+      <!--//--><![CDATA[//><!--
 $("#longURL").keypress(function(event) {
  if (event.which == 13) {
   event.preventDefault();
@@ -103,6 +117,10 @@ $("#shortURL").keypress(function(event) {
   $("#expandButton").click();
  }
 });
+      //--><!]]>
     </script>
+    <noscript>
+      You need to enable JavaScript to effectively use this page.
+    </noscript>
   </body>
 </html>
