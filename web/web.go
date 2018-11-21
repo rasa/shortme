@@ -8,12 +8,15 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/rasa/shortme/conf"
+	"github.com/rasa/shortme/static"
 	"github.com/rasa/shortme/web/api"
 	"github.com/rasa/shortme/web/www"
+	_www "github.com/rasa/shortme/www"
 )
 
 func Start() {
 	log.Println("web starts")
+ 
 	api.Init()
 	www.Init()
 	r := mux.NewRouter()
@@ -26,9 +29,9 @@ func Start() {
 	r.HandleFunc("/", www.Index).Methods(http.MethodGet)
 	r.HandleFunc("/index.html", www.Index).Methods(http.MethodGet)
 
-	r.Handle("/static/{type}/{file}", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
-	r.Handle("/favicon.ico", http.StripPrefix("/", http.FileServer(http.Dir("."))))
-	r.Handle("/robots.txt", http.StripPrefix("/", http.FileServer(http.Dir("."))))
+	r.Handle("/static/{type}/{file}", http.StripPrefix("/static/", http.FileServer(static.Assets)))
+	r.Handle("/favicon.ico", http.StripPrefix("/", http.FileServer(_www.Assets)))
+	r.Handle("/robots.txt", http.StripPrefix("/", http.FileServer(_www.Assets)))
 
 	shortenedURL := fmt.Sprintf("/{shortenedURL:[%v]{1,%v}}", regexp.QuoteMeta(conf.Conf.Common.BaseString), conf.Conf.Common.ShortURLMax)
 

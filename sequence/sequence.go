@@ -43,6 +43,7 @@ func GetSequence(sequenceType string) (sequence Sequence, err error) {
 // If Register is called twice with the same name or if driver is nil, it
 // panics.
 func MustRegister(sequenceType string, sequence Sequence) {
+	log.Printf("Registering sequence %v", sequenceType)
 	sequencesMu.Lock()
 	defer sequencesMu.Unlock()
 

@@ -17,10 +17,19 @@ import (
 	"github.com/rasa/shortme/conf"
 	"github.com/rasa/shortme/sequence"
 	_ "github.com/rasa/shortme/sequence/db"
+	_ "github.com/rasa/shortme/sequence/redis"
+)
+
+type HashType int
+
+const (
+	NoHash HashType = iota
+	HighwayHash
+	SipHash
 )
 
 const (
-	UseHighwayHash         = true
+	hashType               = HighwayHash
 	highwayhash_key_string = "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
 	siphash_k0             = uint64(316665572293978160)
 	siphash_k1             = uint64(8573005253291875333)
@@ -240,7 +249,8 @@ func (shorter *shorter) Short(longURL string) (shortURL string, err error) {
 	u.Host = strings.ToLower(u.Host)
 	longURL = u.String()
 
-	if UseHighwayHash {
+	switch hashType {
+	case HighwayHash:
 		hash, err := highwayhash.New64(highwayhash_key)
 		if err != nil {
 			log.Printf("Failed to decode key: %v", err)
@@ -248,37 +258,42 @@ func (shorter *shorter) Short(longURL string) (shortURL string, err error) {
 		}
 		hash.Write([]byte(longURL))
 		long_hash = hash.Sum64()
-	} else {
+	case SipHash:
 		long_hash = siphash.Hash(siphash_k0, siphash_k1, []byte(longURL))
+	case NoHash:
+		long_hash = 0
 	}
 
-	short_url := ""
-	retry := 0
-	for retry < reconnect_tries {
-		err = shorter.selectShortStmt.QueryRow(long_hash, longURL).Scan(&short_url)
-		if shorter.connectionOK(&err) {
-			break
+	var retry int = 0
+
+	if hashType != NoHash {
+		short_url := ""
+		for retry < reconnect_tries {
+			err = shorter.selectShortStmt.QueryRow(long_hash, longURL).Scan(&short_url)
+			if shorter.connectionOK(&err) {
+				break
+			}
+			shorter.reconnectReadDB()
+			retry += 1
 		}
-		shorter.reconnectReadDB()
-		retry += 1
-	}
 
-	switch {
-	case err == sql.ErrNoRows:
-		log.Printf("No shortURL found for %v (%v)", long_hash, longURL)
-	case err != nil:
-		log.Printf("short read db query error. %v", err)
-		return "", ErrQueryShortDB
-	default:
-		if short_url != "" {
-			return short_url, nil
+		switch {
+		case err == sql.ErrNoRows:
+			log.Printf("No shortURL found for %v (%v)", long_hash, longURL)
+		case err != nil:
+			log.Printf("short read db query error. %v", err)
+			return "", ErrQueryShortDB
+		default:
+			if short_url != "" {
+				return short_url, nil
+			}
 		}
 	}
 
 	for {
 		var seq uint64
 
-		retry := 0
+		retry = 0
 		for retry < reconnect_tries {
 			seq, err = shorter.sequence.NextSequence()
 			if shorter.connectionOK(&err) {

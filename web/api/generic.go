@@ -4,23 +4,34 @@ import (
 	"bytes"
 	"encoding/json"
 	"html/template"
+  "io/ioutil"
 	"log"
 	"net/http"
 
 	"github.com/rasa/shortme/conf"
+	_template "github.com/rasa/shortme/template"
 )
 
 const (
-	html          = "health.html"
-	template_html = "template/" + html
+	html          = "/health.html"
+	template_html = "template" + html
 )
 
 var bb bytes.Buffer
 
 func Init() {
+  fh, err := _template.Assets.Open(html)
+  defer fh.Close()
+  if err != nil {
+    log.Fatalf("Failed to open %v: %v", template_html, err)
+  }
+  var data []byte
+  data, err = ioutil.ReadAll(fh)
+	if err != nil {
+		log.Fatalf("Failed to read %v: %v", template_html, err)
+	}
 	tpl := template.New(html)
-	var err error
-	tpl, err = tpl.ParseFiles(template_html)
+	tpl, err = tpl.Parse(string(data))
 	if err != nil {
 		log.Fatalf("Failed to parse %v: %v", template_html, err)
 	}

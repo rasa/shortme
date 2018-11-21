@@ -79,5 +79,6 @@ func (dbSeq *SequenceDB) NextSequence() (sequence uint64, err error) {
 var dbSeq = SequenceDB{}
 
 func init() {
+	log.Printf("Register sequence %v", "db")
 	sequence.MustRegister("db", &dbSeq)
 }

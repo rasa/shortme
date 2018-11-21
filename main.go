@@ -19,7 +19,7 @@ func main() {
 	flag.Parse()
 
 	if *version {
-		fmt.Println(conf.Version)
+		fmt.Printf("Version %s (%s%s)\n", conf.Version, conf.GitCommit, conf.Tags)
 		os.Exit(0)
 	}
 
