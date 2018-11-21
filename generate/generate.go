@@ -11,7 +11,7 @@ import (
 
 func doDir(dir string) {
   path := "../" + dir
-  file := path + "/" + dir + "assets_vfsdata.go"
+  file := path + "/assets_vfsdata.go"
 	// Delete the old file.
   fmt.Printf("Removing %s\n", file)
 	os.Remove(file)
