@@ -39,13 +39,11 @@ func Init() {
 	if err != nil {
 		log.Fatalf("Failed to execute %v: %v", template_html, err)
 	}
+	if bb.Len() == 0 {
+		log.Fatalf("Failed to execute %v: %v", template_html, err)
+  }
 }
 
 func Index(w http.ResponseWriter, _ *http.Request) {
-	if bb.Len() == 0 {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(http.StatusText(http.StatusInternalServerError)))
-		return
-	}
 	w.Write(bb.Bytes())
 }
