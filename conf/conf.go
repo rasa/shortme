@@ -12,6 +12,7 @@ import (
 )
 
 const (
+	// See https://perishablepress.com/stop-using-unsafe-characters-in-urls/#character-encoding-chart
 	ValidURLChars = "0-9A-Za-z$_.+!*'(),-"
 )
 
@@ -88,7 +89,6 @@ func MustParseConfig(configFile string) {
 	Conf.Common.BaseStringLength = uint64(len(Conf.Common.BaseString))
 
 	s := fmt.Sprintf("[^%v]+", regexp.QuoteMeta(ValidURLChars))
-	log.Printf(s)
 	re := regexp.MustCompile(s)
 
 	if re.MatchString(Conf.Common.BaseString) {

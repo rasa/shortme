@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"html/template"
-  "io/ioutil"
+	"io/ioutil"
 	"log"
 	"net/http"
 
@@ -20,13 +20,13 @@ const (
 var bb bytes.Buffer
 
 func Init() {
-  fh, err := _template.Assets.Open(html)
-  defer fh.Close()
-  if err != nil {
-    log.Fatalf("Failed to open %v: %v", template_html, err)
-  }
-  var data []byte
-  data, err = ioutil.ReadAll(fh)
+	fh, err := _template.Assets.Open(html)
+	defer fh.Close()
+	if err != nil {
+		log.Fatalf("Failed to open %v: %v", template_html, err)
+	}
+	var data []byte
+	data, err = ioutil.ReadAll(fh)
 	if err != nil {
 		log.Fatalf("Failed to read %v: %v", template_html, err)
 	}

@@ -5,9 +5,9 @@ import (
 )
 
 var (
-  Tags string
-  Version string
-  GitCommit string
+	Tags      string
+	Version   string
+	GitCommit string
 )
 
 func init() {

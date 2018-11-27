@@ -20,7 +20,7 @@ all:	build ## Build release executable
 dep: ## Build dependencies
 	go get -d ./...
 
-generate: ## Generate generated code
+generate: ungenerate ## Generate generated code
 	go generate ./...
 
 test: build # Run test suite

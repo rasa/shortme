@@ -3,6 +3,7 @@ package redis
 import (
 	"log"
 	"time"
+
 	"github.com/go-redis/redis"
 	"github.com/rasa/shortme/sequence"
 )

@@ -1,7 +1,7 @@
 package main
 
 import (
-  "fmt"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -10,25 +10,27 @@ import (
 )
 
 func doDir(dir string) {
-  path := "../" + dir
-  file := path + "/assets_vfsdata.go"
+	path := "../" + dir
+	file := path + "/assets_vfsdata.go"
 	// Delete the old file.
-  fmt.Printf("Removing %s\n", file)
+	fmt.Printf("Removing %s\n", file)
 	os.Remove(file)
-  fs := http.Dir(path)
+	fs := http.Dir(path)
 	err := vfsgen.Generate(fs, vfsgen.Options{
 		Filename:        file,
 		PackageName:     dir,
+		BuildTags:       "!dev",
 		VariableName:    "Assets",
 		VariableComment: "",
+		Exclude:         "\\.go$",
 	})
-  if err != nil {
-    log.Println(err)
-  }
+	if err != nil {
+		log.Println(err)
+	}
 }
 
 func main() {
-  doDir("www")
-  doDir("static")
-  doDir("template")
+	doDir("www")
+	doDir("static")
+	doDir("template")
 }
