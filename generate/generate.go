@@ -22,7 +22,7 @@ func doDir(dir string) {
 		BuildTags:       "!dev",
 		VariableName:    "Assets",
 		VariableComment: "",
-		// Exclude:         "\\.go$", // requires https://github.com/shurcooL/vfsgen/pull/60
+		//Exclude:         "\\.(go|bak)$", // requires https://github.com/shurcooL/vfsgen/pull/60
 	})
 	if err != nil {
 		log.Println(err)
