@@ -3,11 +3,18 @@ package db
 import (
 	"database/sql"
 	"log"
+	"regexp"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/rasa/shortme/conf"
 	"github.com/rasa/shortme/sequence"
 )
+
+const sequenceSQL = "UPDATE sequence SET id=LAST_INSERT_ID(id+1)"
+
+// these would work, too:
+// const sequenceSQL = "INSERT INTO sequence (id) VALUES (NULL)"
+// const sequenceSQL = "REPLACE INTO  sequence (id) VALUES (NULL)"
 
 type SequenceDB struct {
 	db   *sql.DB
@@ -15,8 +22,10 @@ type SequenceDB struct {
 }
 
 func (dbSeq *SequenceDB) Open() (err error) {
-	var db *sql.DB
-	db, err = sql.Open("mysql", conf.Conf.SequenceDB.DSN)
+	re := regexp.MustCompile("@([^/]*)")
+	b := re.FindStringSubmatch(conf.Conf.SequenceDB.DSN)
+	log.Printf("Connecting sequence write to %v at %v\n", conf.MYSQL, b)
+	db, err := sql.Open("mysql", conf.Conf.SequenceDB.DSN)
 	if err != nil {
 		log.Printf("Sequence db open error: %v", err)
 		return err
@@ -33,7 +42,7 @@ func (dbSeq *SequenceDB) Open() (err error) {
 
 	dbSeq.db = db
 
-	dbSeq.stmt, err = dbSeq.db.Prepare(`UPDATE sequence SET id=LAST_INSERT_ID(id+1)`)
+	dbSeq.stmt, err = dbSeq.db.Prepare(sequenceSQL)
 	if err != nil {
 		log.Printf("Sequence db prepare error: %v", err)
 		return err
@@ -79,6 +88,5 @@ func (dbSeq *SequenceDB) NextSequence() (sequence uint64, err error) {
 var dbSeq = SequenceDB{}
 
 func init() {
-	log.Printf("Register sequence %v", "db")
-	sequence.MustRegister("db", &dbSeq)
+	sequence.MustRegister(string(conf.MYSQL), &dbSeq)
 }

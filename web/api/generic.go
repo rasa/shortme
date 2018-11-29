@@ -21,10 +21,10 @@ var bb bytes.Buffer
 
 func Init() {
 	fh, err := _template.Assets.Open(html)
-	defer fh.Close()
 	if err != nil {
 		log.Fatalf("Failed to open %v: %v", template_html, err)
 	}
+	defer fh.Close()
 	var data []byte
 	data, err = ioutil.ReadAll(fh)
 	if err != nil {

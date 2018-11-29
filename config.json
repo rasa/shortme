@@ -3,6 +3,14 @@
     "# Listen address": "↓",
     "listen": "0.0.0.0:3030"
   },
+  "sequence_backend": "mysql",
+  "sequence_badger": {
+    "dir": ".",
+    "value_dir": ".",
+    "sync_writes": true,
+    "key_name": "shortme",
+    "bandwidth": 1000
+  },
   "sequence_db": {
     "# Mysql sequence generator DSN": "↓",
     "dsn": "sequence:sequence@tcp(127.0.0.1:3306)/sequence",
@@ -12,6 +20,12 @@
 
     "# Mysql connection pool max open connection": "↓",
     "max_open_conns": 4
+  },
+  "sequence_redis": {
+    "addr":         ":6379",
+    "password":      "",
+    "pool_size":     10,
+    "key_name":      "shortme"
   },
   "short_db": {
     "# Mysql short service read db DSN": "↓",

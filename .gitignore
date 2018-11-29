@@ -19,3 +19,7 @@ nohup.out
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
 local.json
+
+# Badger files:
+*.vlog
+MANIFEST

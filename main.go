@@ -10,8 +10,10 @@ import (
 	"github.com/rasa/shortme/web"
 )
 
+const LOCAL_JSON = "local.json"
+
 var (
-	cfgFile = flag.String("c", "config.json", "configuration file")
+	cfgFile = flag.String("c", conf.DEFAULT_CONFIG_JSON, "configuration file")
 	version = flag.Bool("v", false, "show version")
 )
 
@@ -23,12 +25,12 @@ func main() {
 		os.Exit(0)
 	}
 
-	// parse config
-	conf.MustParseConfig(*cfgFile)
+	conf.ParseDefaultConfig()
+	conf.ParseConfig(*cfgFile)
 
-	_, err := os.Stat("local.json")
+	_, err := os.Stat(LOCAL_JSON)
 	if err == nil {
-		conf.MustParseConfig("local.json")
+		conf.ParseConfig(LOCAL_JSON)
 	}
 
 	// short service

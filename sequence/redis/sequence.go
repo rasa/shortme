@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/go-redis/redis"
+	"github.com/rasa/shortme/conf"
 	"github.com/rasa/shortme/sequence"
 )
 
@@ -13,13 +14,15 @@ type SequenceRedis struct {
 }
 
 func (redisSeq *SequenceRedis) Open() (err error) {
+	log.Printf("Connecting sequence write to %v at %v\n", conf.REDIS, conf.Conf.SequenceRedis.Addr)
 	client := redis.NewClient(&redis.Options{
-		Addr:         ":6379",
-		DialTimeout:  10 * time.Second,
-		ReadTimeout:  30 * time.Second,
-		WriteTimeout: 30 * time.Second,
-		PoolSize:     10,
-		PoolTimeout:  30 * time.Second,
+		Addr:         conf.Conf.SequenceRedis.Addr,
+		Password:     conf.Conf.SequenceRedis.Password,
+		PoolSize:     conf.Conf.SequenceRedis.PoolSize,
+		DialTimeout:  10 * time.Second, // * time.Duration(conf.Conf.SequenceRedis.DialTimeout),
+		PoolTimeout:  30 * time.Second, // * time.Duration(conf.Conf.SequenceRedis.PoolTimeout),
+		ReadTimeout:  30 * time.Second, // * time.Duration(conf.Conf.SequenceRedis.ReadTimeout),
+		WriteTimeout: 30 * time.Second, // * time.Duration(conf.Conf.SequenceRedis.WriteTimeout),
 	})
 
 	_, err = client.Ping().Result()
@@ -40,14 +43,13 @@ func (redisSeq *SequenceRedis) Close() {
 }
 
 func (redisSeq *SequenceRedis) NextSequence() (sequence uint64, err error) {
-	keyName := "shortme"
-	err = redisSeq.redisClient.Incr(keyName).Err()
+	err = redisSeq.redisClient.Incr(conf.Conf.SequenceRedis.KeyName).Err()
 	if err != nil {
 		log.Printf("Sequence redis incr error: %v", err)
 		return 0, err
 	}
 	var lastID int64
-	lastID, err = redisSeq.redisClient.Get(keyName).Int64()
+	lastID, err = redisSeq.redisClient.Get(conf.Conf.SequenceRedis.KeyName).Int64()
 	if err != nil {
 		log.Printf("Sequence redis get error: %v", err)
 		return 0, err
@@ -65,6 +67,5 @@ func (redisSeq *SequenceRedis) NextSequence() (sequence uint64, err error) {
 var redisSeq = SequenceRedis{}
 
 func init() {
-	log.Printf("Register sequence %v", "db")
-	sequence.MustRegister("redis", &redisSeq)
+	sequence.MustRegister(string(conf.REDIS), &redisSeq)
 }

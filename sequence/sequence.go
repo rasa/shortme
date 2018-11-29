@@ -34,16 +34,14 @@ func GetSequence(sequenceType string) (sequence Sequence, err error) {
 	if value, ok := sequences[sequenceType]; ok {
 		sequence = value
 		return sequence, nil
-	} else {
-		return nil, fmt.Errorf("%v is not registered", sequenceType)
 	}
+	return nil, fmt.Errorf("%v is not registered", sequenceType)
 }
 
 // Register makes a sequence generator available by the provided sequenceType.
 // If Register is called twice with the same name or if driver is nil, it
 // panics.
 func MustRegister(sequenceType string, sequence Sequence) {
-	log.Printf("Registering sequence %v", sequenceType)
 	sequencesMu.Lock()
 	defer sequencesMu.Unlock()
 

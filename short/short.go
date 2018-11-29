@@ -5,9 +5,9 @@ import (
 	"database/sql/driver"
 	"encoding/hex"
 	"errors"
-	"fmt"
 	"log"
 	"net/url"
+	"regexp"
 	"strings"
 
 	"github.com/dchest/siphash"
@@ -16,6 +16,8 @@ import (
 	"github.com/rasa/shortme/base"
 	"github.com/rasa/shortme/conf"
 	"github.com/rasa/shortme/sequence"
+
+	_ "github.com/rasa/shortme/sequence/badger"
 	_ "github.com/rasa/shortme/sequence/db"
 	_ "github.com/rasa/shortme/sequence/redis"
 )
@@ -91,6 +93,9 @@ func (shorter *shorter) readClose() {
 func (shorter *shorter) reconnectReadDB() {
 	shorter.readClose()
 
+	re := regexp.MustCompile("@([^/]*)")
+	b := re.FindStringSubmatch(conf.Conf.ShortDB.ReadDSN)
+	log.Printf("Connecting short read to %v at %v\n", conf.MYSQL, b[0])
 	db, err := sql.Open("mysql", conf.Conf.ShortDB.ReadDSN)
 	if err != nil {
 		log.Panicf("Short read db open error: %v", err)
@@ -106,13 +111,13 @@ func (shorter *shorter) reconnectReadDB() {
 
 	shorter.readDB = db
 
-	selectLongSQL := fmt.Sprintf(`SELECT long_url FROM short WHERE short_url=?`)
+	selectLongSQL := "SELECT long_url FROM short WHERE short_url=?"
 	shorter.selectLongStmt, err = shorter.readDB.Prepare(selectLongSQL)
 	if err != nil {
 		log.Panicf("Short db prepare long error: %v", err)
 	}
 
-	selectShortSQL := fmt.Sprintf(`SELECT short_url FROM short WHERE long_hash=? and long_url=?`)
+	selectShortSQL := "SELECT short_url FROM short WHERE long_hash=? and long_url=?"
 	shorter.selectShortStmt, err = shorter.readDB.Prepare(selectShortSQL)
 	if err != nil {
 		log.Panicf("Short db prepare short error: %v", err)
@@ -132,7 +137,9 @@ func (shorter *shorter) writeClose() {
 
 func (shorter *shorter) reconnectWriteDB() {
 	shorter.writeClose()
-
+	re := regexp.MustCompile("@([^/]*)")
+	b := re.FindStringSubmatch(conf.Conf.ShortDB.WriteDSN)
+	log.Printf("Connecting short write to %v at %v\n", conf.MYSQL, b[0])
 	db, err := sql.Open("mysql", conf.Conf.ShortDB.WriteDSN)
 	if err != nil {
 		log.Panicf("Short write db open error: %v", err)
@@ -148,7 +155,7 @@ func (shorter *shorter) reconnectWriteDB() {
 
 	shorter.writeDB = db
 
-	insertSQL := fmt.Sprintf(`INSERT INTO short(long_url, short_url, long_hash) VALUES(?, ?, ?)`)
+	insertSQL := "INSERT INTO short(long_url, short_url, long_hash) VALUES(?, ?, ?)"
 
 	shorter.insertStmt, err = shorter.writeDB.Prepare(insertSQL)
 	if err != nil {
@@ -171,9 +178,10 @@ func (shorter *shorter) sequenceClose() {
 func (shorter *shorter) reconnectSequence() {
 	shorter.sequenceClose()
 
-	seq, err := sequence.GetSequence("db")
+	log.Printf("Connecting to sequence write via %v\n", conf.Conf.SequenceBackend)
+	seq, err := sequence.GetSequence(string(conf.Conf.SequenceBackend))
 	if err != nil {
-		log.Panicf("Get sequence instance error: %v", err)
+		log.Panicf("Invalid backend type: %v: %v", conf.Conf.SequenceBackend, err)
 	}
 
 	err = seq.Open()

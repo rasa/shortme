@@ -9,7 +9,7 @@ import (
 	"github.com/shurcooL/vfsgen"
 )
 
-func doDir(dir string) {
+func doFiles(dir string, files string) {
 	path := "../" + dir
 	file := path + "/assets_vfsdata.go"
 	// Delete the old file.
@@ -22,7 +22,7 @@ func doDir(dir string) {
 		BuildTags:       "!dev",
 		VariableName:    "Assets",
 		VariableComment: "",
-		//Exclude:         "\\.(go|bak)$", // requires https://github.com/shurcooL/vfsgen/pull/60
+		Include:         files, // requires https://github.com/shurcooL/vfsgen/pull/60
 	})
 	if err != nil {
 		log.Println(err)
@@ -30,7 +30,8 @@ func doDir(dir string) {
 }
 
 func main() {
-	doDir("www")
-	doDir("static")
-	doDir("template")
+	doFiles("conf", "config.json$")
+	doFiles("static", "\\.(css|js)$")
+	doFiles("template", "\\.html?$")
+	doFiles("www", "\\.(ico|txt)$")
 }

@@ -2,11 +2,13 @@ package template
 
 import (
 	"fmt"
-	"github.com/rasa/shortme/conf"
-	"github.com/rasa/shortme/static"
 	"html/template"
 	"io/ioutil"
 	"log"
+	"reflect"
+
+	"github.com/rasa/shortme/conf"
+	"github.com/rasa/shortme/static"
 )
 
 const (
@@ -19,8 +21,6 @@ const (
 	cssInline = "\n<style type=\"text/css\">\n<!--/*--><![CDATA[/*><!-- */\n/* %s */\n%s\n/*]]>*/-->\n</style>\n"
 	jsInline  = "\n<script type=\"text/javascript\">\n<!--//--><![CDATA[//><!-- \n/* %s */\n%s\n//--><!]]>\n</script>\n"
 )
-
-var inline = true
 
 type Index struct {
 	Title                            string
@@ -41,7 +41,7 @@ type Index struct {
 }
 
 func include(file string, fileFmt string, inlineFmt string) template.HTML {
-	if !inline {
+	if reflect.TypeOf(static.Assets).String() == "http.Dir" {
 		return template.HTML(fmt.Sprintf(fileFmt, staticDir+file))
 	}
 
