@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/shurcooL/vfsgen"
+	"github.com/rasa/vfsgen"
 )
 
 func doFiles(dir string, files string) {
