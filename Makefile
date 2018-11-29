@@ -14,6 +14,7 @@ GIT_IMPORT=github.com/rasa/shortme/conf
 GIT_DIRTY=$(shell test -n "`git status --porcelain`" && echo "+CHANGES" || true)
 GIT_COMMIT=$(shell git rev-parse --short HEAD)
 GOLDFLAGS=-X $(GIT_IMPORT).GitCommit=$(GIT_COMMIT)$(GIT_DIRTY) -X $(GIT_IMPORT).Version=$(version)
+TAGS?=dev
 
 all:	build ## Build release executable
 
@@ -21,22 +22,25 @@ dep: ## Build dependencies
 	go get -d ./...
 
 generate: ungenerate ## Generate generated code
-	go generate ./...
+	cd generate && \
+	go clean && \
+	go build && \
+	./generate
 
 test: build # Run test suite
 	go test -v ./...
 
 vet: ## Run go vet
-	go list ./... | grep -v "./vendor*" | xargs go vet
+	go vet ./...
 
 fmt: ## Run gofmt
-	$(FIND) . -type f -name "*.go" | grep -v "./vendor*" | xargs gofmt -s -w
+	gofmt -s -w .
 
-build: dep vet fmt ## Build release executable
+build: dep vet fmt generate ## Build release executable
 	go build -ldflags="$(GOLDFLAGS)" -o shortme$(EXTENSION) main.go
 
 dev: dep vet fmt ## Build development executable
-	go build -ldflags="$(GOLDFLAGS) -X $(GIT_IMPORT).Tags=-dev" -o shortme$(EXTENSION) -tags dev main.go
+	go build -ldflags="$(GOLDFLAGS) -X $(GIT_IMPORT).Tags=$(TAGS)" -tags "$(TAGS)" -o shortme$(EXTENSION)  main.go
 
 run: ## Run executable
 	touch nohup.out
@@ -44,12 +48,13 @@ run: ## Run executable
 	tail -f nohup.out
 
 clean: ## Remove executables
-	rm -f shortme shortme$(EXTENSION)
+	-rm -f shortme$(EXTENSION)
 
 ungenerate: ## Remove generated files
-	rm -f static/assets_vfsdata.go
-	rm -f template/assets_vfsdata.go
-	rm -f www/assets_vfsdata.go
+	-rm -f conf/assets_vfsdata.go
+	-rm -f static/assets_vfsdata.go
+	-rm -f template/assets_vfsdata.go
+	-rm -f www/assets_vfsdata.go
 
 .PHONY: all fmt test dep build clean vet dev generate ungenerate
 

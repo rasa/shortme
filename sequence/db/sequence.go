@@ -24,7 +24,7 @@ type SequenceDB struct {
 func (dbSeq *SequenceDB) Open() (err error) {
 	re := regexp.MustCompile("@([^/]*)")
 	b := re.FindStringSubmatch(conf.Conf.SequenceDB.DSN)
-	log.Printf("Connecting sequence write to %v at %v\n", conf.MYSQL, b)
+	log.Printf("Connecting sequence write to %v at %v\n", conf.MYSQL, b[0])
 	db, err := sql.Open("mysql", conf.Conf.SequenceDB.DSN)
 	if err != nil {
 		log.Printf("Sequence db open error: %v", err)
@@ -63,26 +63,23 @@ func (dbSeq *SequenceDB) Close() {
 }
 
 func (dbSeq *SequenceDB) NextSequence() (sequence uint64, err error) {
-	var res sql.Result
-	res, err = dbSeq.stmt.Exec()
+	res, err := dbSeq.stmt.Exec()
 	if err != nil {
 		log.Printf("Sequence db update error: %v", err)
 		return 0, err
 	}
 
 	// 兼容LastInsertId方法的返回值
-	var lastID int64
-	lastID, err = res.LastInsertId()
+	lastID, err := res.LastInsertId()
 	if err != nil {
 		log.Printf("Sequence db LastInsertId error: %v", err)
 		return 0, err
 	}
 
-	sequence = uint64(lastID)
 	// mysql sequence will start at 1, we actually want it to be
 	// started at 0. :)
-	sequence -= 1
-	return sequence, nil
+	sequence = uint64(lastID) - 1
+	return sequence, err
 }
 
 var dbSeq = SequenceDB{}

@@ -7,13 +7,13 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
-	"reflect"
 	"regexp"
 	"strings"
 )
 
 const (
 	DEFAULT_CONFIG_JSON = "config.json"
+	LOCAL_JSON          = "local.json"
 	// See https://perishablepress.com/stop-using-unsafe-characters-in-urls/#character-encoding-chart
 	ValidURLChars = "0-9A-Za-z$_.+!*'(),-"
 )
@@ -86,18 +86,20 @@ type config struct {
 
 var Conf config
 
+func ParseConfigs(cfgFile string) {
+	ParseDefaultConfig()
+	ParseConfig(cfgFile)
+	ParseLocalConfig()
+}
+
 func ParseDefaultConfig() {
-	if reflect.TypeOf(Assets).String() == "http.Dir" {
-		return
-	}
 	filename := "internal config"
 	fh, err := Assets.Open(DEFAULT_CONFIG_JSON)
 	if err != nil {
 		log.Fatalf("Failed to open %v: %v", filename, err)
 	}
 	defer fh.Close()
-	var data []byte
-	data, err = ioutil.ReadAll(fh)
+	data, err := ioutil.ReadAll(fh)
 	if err != nil {
 		log.Fatalf("Failed to read %v: %v", filename, err)
 	}
@@ -130,6 +132,15 @@ func ParseConfig(configFile string) {
 		log.Fatalf("Cannot read %v\n", err)
 	}
 	parseConfig(configFile, content)
+}
+
+func ParseLocalConfig() {
+	_, err := os.Stat(LOCAL_JSON)
+	if err != nil {
+		// no error if not found
+		return
+	}
+	ParseConfig(LOCAL_JSON)
 }
 
 func parseConfig(configFile string, content []byte) {

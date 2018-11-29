@@ -46,14 +46,14 @@ func (badgerSeq *SequenceBadger) Close() {
 	}
 }
 
-func (badgerSeq *SequenceBadger) NextSequence() (lastID uint64, err error) {
-	lastID, err = badgerSeq.badgerSequence.Next()
+func (badgerSeq *SequenceBadger) NextSequence() (sequence uint64, err error) {
+	sequence, err = badgerSeq.badgerSequence.Next()
 	if err != nil {
 		log.Printf("Sequence badger get error: %v", err)
 		return 0, err
 	}
-	log.Printf("Sequence badger LastID=%v", lastID)
-	return lastID, nil
+	log.Printf("Sequence badger sequence=%v", sequence)
+	return sequence, err
 }
 
 var badgerSeq = SequenceBadger{}

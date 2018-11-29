@@ -48,20 +48,14 @@ func (redisSeq *SequenceRedis) NextSequence() (sequence uint64, err error) {
 		log.Printf("Sequence redis incr error: %v", err)
 		return 0, err
 	}
-	var lastID int64
-	lastID, err = redisSeq.redisClient.Get(conf.Conf.SequenceRedis.KeyName).Int64()
+	sequence, err = redisSeq.redisClient.Get(conf.Conf.SequenceRedis.KeyName).Uint64()
 	if err != nil {
 		log.Printf("Sequence redis get error: %v", err)
 		return 0, err
 	}
 
-	log.Printf("Sequence redis LastID=%v", lastID)
-
-	sequence = uint64(lastID)
-	// mysql sequence will start at 1, we actually want it to be
-	// started at 0. :)
-	sequence -= 1
-	return sequence, nil
+	log.Printf("Sequence redis sequence=%v", sequence)
+	return sequence, err
 }
 
 var redisSeq = SequenceRedis{}

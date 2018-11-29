@@ -5,7 +5,6 @@ import (
 	"html/template"
 	"io/ioutil"
 	"log"
-	"reflect"
 
 	"github.com/rasa/shortme/conf"
 	"github.com/rasa/shortme/static"
@@ -41,7 +40,7 @@ type Index struct {
 }
 
 func include(file string, fileFmt string, inlineFmt string) template.HTML {
-	if reflect.TypeOf(static.Assets).String() == "http.Dir" {
+	if conf.Tags == "dev" {
 		return template.HTML(fmt.Sprintf(fileFmt, staticDir+file))
 	}
 
