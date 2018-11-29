@@ -4,72 +4,68 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    {{/* The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags */}}
     <title>{{.Title}}</title>
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <link rel="icon" type="image/png" href="/favicon.png">
     <meta name="description" content="Yet Another URL Shortening Service in Golang">
     <meta name="author" content="Andy Xie">
-    
-    <!-- Apple Touch Icon (at least 200x200px) -->
+    {{/* Apple Touch Icon (at least 200x200px) */}}
     <link rel="apple-touch-icon" href="/custom-icon.png">
-
-    <!-- To run web application in full-screen -->
+    {{/* To run web application in full-screen */}}
     <meta name="apple-mobile-web-app-capable" content="yes">
-
-    <!-- Status Bar Style (see Supported Meta Tags below for available values) -->
-    <!-- Has no effect unless you have the previous meta tag -->
+    {{/* Status Bar Style (see Supported Meta Tags below for available values) */}}
+    {{/* Has no effect unless you have the previous meta tag */}}
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    
-    <!-- Microsoft Tiles -->
+    {{/* Microsoft Tiles */}}
     <meta name="msapplication-config" content="browserconfig.xml" />
 
-    <!-- Bootstrap core CSS -->
-    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous"> -->
+    {{/* Bootstrap core CSS */}}
     {{.Bootstrap_min_css}}
+    {{/* <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous"> */}}
 
-    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
-    <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/css/ie10-viewport-bug-workaround.css" integrity="sha384-sPZtnf00OKtohgCjYPiHYhx4vOa4gD182/f6+z1N+LzXdE2e5bENObUq17/FrRFS" crossorigin="anonymous"> -->
+    {{/* IE10 viewport hack for Surface/desktop Windows 8 bug */}}
     {{.Ie10_viewport_bug_workaround_css}}
-    <!-- Custom styles for this template -->
-    <!-- <link href="/static/css/shortme.css" rel="stylesheet"> -->
-    {{.Shortme_css}}
-    <!-- Just for debugging purposes. Don't actually copy these 2 lines! -->
-    <!--[if lt IE 9]><script src="/static/js/ie8-responsive-file-warning.js"></script><![endif]-->
-    <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap-offcanvas@1.0.0/ie-emulation-modes-warning.js" integrity="sha256-yEQpKbHsFQ0y3701lo5beguiJuTGFD+Nb3Gq2k3+wOo=" crossorigin="anonymous"></script>  -->
-    {{.Ie_emulation_modes_warning_js}}
-    <!-- {{/*.Ie8_responsive_file_warning_js*/}} -->
+    {{/* <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/css/ie10-viewport-bug-workaround.css" integrity="sha384-sPZtnf00OKtohgCjYPiHYhx4vOa4gD182/f6+z1N+LzXdE2e5bENObUq17/FrRFS" crossorigin="anonymous"> */}}
 
-    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    {{/* Custom styles for this template */}}
+    {{.Shortme_css}}
+    {{/* <link href="/static/css/shortme.css" rel="stylesheet"> */}}
+
+    {{/* Just for debugging purposes. Don't actually copy these 2 lines! */}}
+    <!--[if lt IE 9]><script src="/static/js/ie8-responsive-file-warning.js"></script>{{/*.Ie8_responsive_file_warning_js*/}}<![endif]-->
+    {{.Ie_emulation_modes_warning_js}}
+    {{/* <script src="https://cdn.jsdelivr.net/npm/bootstrap-offcanvas@1.0.0/ie-emulation-modes-warning.js" integrity="sha256-yEQpKbHsFQ0y3701lo5beguiJuTGFD+Nb3Gq2k3+wOo=" crossorigin="anonymous"></script> */}}
+
+    {{/* HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries */}}
     <!--[if lt IE 9]>
       {{/* <script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.min.js" integrity="sha384-qFIkRsVO/J5orlMvxK1sgAt2FXT67og+NyFTITYzvbIP1IJavVEKZM7YWczXkwpB" crossorigin="anonymous"></script> */}}
       <script src="/static/js/html5shiv.min.js"></script>
       {{/* <script src="https://cdnjs.cloudflare.com/ajax/libs/respond.js/1.4.2/respond.min.js" integrity="sha256-g6iAfvZp+nDQ2TdTR/VVKJf3bGro4ub5fvWSWVRi2NE=" crossorigin="anonymous"></script> */}}
       <script src="/static/js/respond.min.js"></script>
     <![endif]-->
-    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha384-tsQFqpEReu7ZLhBV2VZlAu7zcOV+rXbYlF2cqB8txI/8aZajjp4Bqd+V6D5IgvKT" crossorigin="anonymous"></script> -->
+
     {{.Jquery_min_js}}
-    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.qrcode/1.0/jquery.qrcode.min.js" integrity="sha256-9MzwK2kJKBmsJFdccXoIDDtsbWFh8bjYK/C7UjB1Ay0=" crossorigin="anonymous"></script> -->
+    {{/* <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha384-tsQFqpEReu7ZLhBV2VZlAu7zcOV+rXbYlF2cqB8txI/8aZajjp4Bqd+V6D5IgvKT" crossorigin="anonymous"></script> */}}
+
     {{.Jquery_qrcode_min_js}}
-    <!-- <script src="/static/js/shortme.js"></script> -->
+    {{/* <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.qrcode/1.0/jquery.qrcode.min.js" integrity="sha256-9MzwK2kJKBmsJFdccXoIDDtsbWFh8bjYK/C7UjB1Ay0=" crossorigin="anonymous"></script> */}}
+
     {{.Shortme_js}}
-
+    {{/* <script src="/static/js/shortme.js"></script> */}}
   </head>
-
   <body>
-
     <div class="container">
-
-      <!-- Static navbar -->
+      {{/* Static navbar */}}
       <nav class="navbar navbar-default">
         <div class="container-fluid">
           <div class="navbar-header">
             <a class="navbar-brand" href="/">{{.Title}}</a>
-          </div><!--/.nav-collapse -->
-        </div><!--/.container-fluid -->
+          </div>{{/* nav-collapse */}}
+        </div>{{/* container-fluid */}}
       </nav>
 
-      <!-- Main component for a primary marketing message or call to action -->
+      {{/* Main component for a primary marketing message or call to action */}}
       <div class="jumbotron">
           <div role="row">
               <div class="input-group">
@@ -81,9 +77,9 @@
           </div>
           <div id="shortURLBlankLine"></div>
           <div class="row">
-              <div id="shortenedURL" class="h4 text-primary col-xs-4 text-center"></div>
-              <div id="shortenedQR" class="col-xs-4 text-center"></div>
-              <div id="shortenedURLPreview" class="col-xs-4 text-center"></div>
+              <div id="shortenedURL" class="h4 text-primary col-sm-4 text-center"></div>
+              <div id="shortenedQR" class="col-sm-4 text-center"></div>
+              <div id="shortenedURLPreview" class="col-sm-4 text-center"></div>
           </div>
       </div>
 
@@ -98,20 +94,20 @@
           </div>
           <div id="expandedURLBlankLine"></div>
           <div class="row">
-              <div id="expandedURL" class="h4 text-primary col-xs-4 text-center expandedURL"></div>
-              <div id="expandedQR" class="col-xs-4 text-center"></div>
-              <div id="expandedURLPreview" class="col-xs-4 text-center"></div>
+              <div id="expandedURL" class="h4 text-primary col-sm-4 text-center expandedURL"></div>
+              <div id="expandedQR" class="col-sm-4 text-center"></div>
+              <div id="expandedURLPreview" class="col-sm-4 text-center"></div>
       </div>
-    </div> <!-- /container -->
+    </div>{{/* /container */}}
 
-    <!-- Bootstrap core JavaScript
-    ================================================== -->
-    <!-- Placed at the end of the document so the pages load faster -->
-    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script> -->
+    {{/* Bootstrap core JavaSc */}}
+    {{/* Placed at the end of the document so the pages load faster */}}
     {{.Bootstrap_min_js}}
-    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
-    <!-- <script src="https://maxcdn.bootstrapcdn.com/js/ie10-viewport-bug-workaround.js" integrity="sha384-EZKKO3vHj6CHKQPIi5+Ubzvx7GjCAfgb/28vGjgly8qKb2DMq7V5D2o//Bjp9z03" crossorigin="anonymous"></script> -->
+    {{/* <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script> */}}
+
+    {{/* IE10 viewport hack for Surface/desktop Windows 8 bug */}}
     {{.Ie10_viewport_bug_workaround_js}}
+    {{/* <script src="https://maxcdn.bootstrapcdn.com/js/ie10-viewport-bug-workaround.js" integrity="sha384-EZKKO3vHj6CHKQPIi5+Ubzvx7GjCAfgb/28vGjgly8qKb2DMq7V5D2o//Bjp9z03" crossorigin="anonymous"></script> */}}
     <script type="text/javascript">
 $("#longURL").keypress(function(event) {
  if (event.which == 13) {

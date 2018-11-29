@@ -14,11 +14,11 @@ const (
 	staticDir = "/static"
 	cssDir    = "/css"
 	jsDir     = "/js"
-	cssFile   = "<link href=\"%s\" rel=\"stylesheet\"></link>\n"
+	cssFile   = "<link href=\"%s\" rel=\"stylesheet\"></link>"
 	jsFile    = "<script src=\"%s\"></script>"
 	// see http://www.webdevout.net/articles/escaping-style-and-script-data
-	cssInline = "\n<style type=\"text/css\">\n<!--/*--><![CDATA[/*><!-- */\n/* %s */\n%s\n/*]]>*/-->\n</style>\n"
-	jsInline  = "\n<script type=\"text/javascript\">\n<!--//--><![CDATA[//><!-- \n/* %s */\n%s\n//--><!]]>\n</script>\n"
+	cssInline = "<style type=\"text/css\">\n<!--/*--><![CDATA[/*><!-- */\n/* %s */\n%s\n/*]]>*/-->\n</style>"
+	jsInline  = "<script type=\"text/javascript\">\n<!--//--><![CDATA[//><!-- \n/* %s */\n%s\n//--><!]]>\n</script>"
 )
 
 type Index struct {
