@@ -347,3 +347,8 @@ func Start() {
 	Shorter.mustInitSequence()
 	log.Println("shorter starts")
 }
+
+func Close() {
+	log.Println("shorter closes")
+	Shorter.close()
+}

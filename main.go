@@ -50,4 +50,6 @@ func main() {
 
 	// api
 	web.Start()
+
+	short.Close()
 }
