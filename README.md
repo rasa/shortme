@@ -349,3 +349,22 @@ server such as **Nginx**. Under this way, the statistics info can be analysed
 self phone. This remains to be tested more meticulous.  
 * One demand about customizing the short url can not be done easily currently
  in **shortme** according to the id generation logic. Let's make it happen. :)
+
+ ### Features Added in Rasa's Fork:
+ 
+ * No external files needed, all assets are compiled into executible
+ * Graceful shutdown supported via /shutdown URL, or sending SIGINT/Ctrl-C
+ * Updated all external Javascript and CSS files to latest versions
+ * Add option to use Redis or Badger for sequence backend
+ * Allow short URLs longer than 11 characters (to support custom URLs)
+ * Support all allowed URL characters
+ * Error check some config settings (all will be checked eventually)
+ * Switch config.conf [toml] to config.json
+ * Support / as well as /index.html
+ * Add robots.txt and reduced size of favicon.ico
+ * URLs can be entered as https://example.com, or simply example.com (defaults to http for now)
+ * Allow pressing [Enter] to submit URL
+ * Simplified schema definitions, added grant and drop SQL statements
+ * Check if URL has already been shortened, and return the short URL for it, if found
+ * Switched SQL definitions to utf8mb4 character set
+ 

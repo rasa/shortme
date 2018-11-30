@@ -20,6 +20,8 @@ import (
 	_www "github.com/rasa/shortme/www"
 )
 
+// inspired by https://stackoverflow.com/a/43639645
+
 type myServer struct {
 	http.Server
 	shutdownReq chan bool
