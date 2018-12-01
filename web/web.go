@@ -84,15 +84,15 @@ func (s *myServer) WaitShutdown() {
 	case sig := <-irqSig:
 		log.Printf("Received shutdown request: %v", sig)
 		if sig == syscall.SIGHUP {
-			atomic.CompareAndSwapUint32(&s.sighupped, 0, 1)
+			atomic.StoreUint32(&s.sighupped, 1)
 		}
 	case sig := <-s.shutdownReq:
 		log.Printf("Shutdown request via /sigint URL: %v", sig)
-		atomic.CompareAndSwapUint32(&s.reqCount, 0, 1)
+		atomic.StoreUint32(&s.reqCount, 1)
 	case sig := <-s.sighupReq:
 		log.Printf("Sighup request via /sighup URL: %v", sig)
-		atomic.CompareAndSwapUint32(&s.reqCount, 0, 1)
-		atomic.CompareAndSwapUint32(&s.sighupped, 0, 1)
+		atomic.StoreUint32(&s.reqCount, 1)
+		atomic.StoreUint32(&s.sighupped, 1)
 	}
 
 	log.Printf("Stoping http server")
@@ -126,7 +126,7 @@ func (s *myServer) ShutdownHandler(w http.ResponseWriter, r *http.Request) {
 func (s *myServer) SighupHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Restarting http server"))
 
-	atomic.CompareAndSwapUint32(&s.sighupped, 0, 1)
+	atomic.StoreUint32(&s.sighupped, 1)
 
 	//Do nothing if shutdown request already issued
 	//if s.reqCount == 0 then set to 1, return true otherwise false
