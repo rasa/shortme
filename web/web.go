@@ -26,6 +26,7 @@ type myServer struct {
 	http.Server
 	shutdownReq chan bool
 	reqCount    uint32
+	sighupped   uint32
 }
 
 func NewServer() *myServer {
@@ -67,7 +68,11 @@ func NewServer() *myServer {
 
 func (s *myServer) WaitShutdown() {
 	irqSig := make(chan os.Signal, 1)
-	signal.Notify(irqSig, syscall.SIGINT, syscall.SIGTERM)
+	signal.Notify(irqSig,
+		syscall.SIGHUP,
+		syscall.SIGINT,
+		syscall.SIGTERM,
+	)
 
 	// log.Printf("Waiting for shutdown signal")
 	//Wait interrupt or shutdown request through /shutdown
@@ -75,6 +80,9 @@ func (s *myServer) WaitShutdown() {
 	case sig := <-irqSig:
 		log.Printf("Received shutdown request: %v", sig)
 		atomic.CompareAndSwapUint32(&s.reqCount, 0, 1)
+		if sig == syscall.SIGHUP {
+			atomic.CompareAndSwapUint32(&s.sighupped, 0, 1)
+		}
 	case sig := <-s.shutdownReq:
 		log.Printf("Shutdown shutdown request via /shutdown URL: %v", sig)
 	}
@@ -111,7 +119,11 @@ func (s *myServer) Running() bool {
 	return atomic.LoadUint32(&s.reqCount) == 0
 }
 
-func Start() {
+func (s *myServer) Sighupped() bool {
+	return atomic.LoadUint32(&s.sighupped) == 1
+}
+
+func Start() bool {
 	log.Println("web starts")
 
 	api.Init()
@@ -135,4 +147,5 @@ func Start() {
 	//wait shutdown
 	server.WaitShutdown()
 	log.Printf("Web server shutdown, gracefully exiting")
+	return server.Sighupped()
 }

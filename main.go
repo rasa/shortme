@@ -43,13 +43,21 @@ func main() {
 		runtime.NumCPU(),
 		runtime.GOMAXPROCS(-1))
 
-	conf.ParseConfigs(*cfgFile)
+	for {
+		conf.ParseConfigs(*cfgFile)
 
-	// short service
-	short.Start()
+		// short service
+		short.Start()
 
-	// api
-	web.Start()
+		// api
+		sighup := web.Start()
 
-	short.Close()
+		short.Close()
+
+		if !sighup {
+			log.Println("Exiting")
+			break
+		}
+		log.Println("Reloading config files")
+	}
 }
