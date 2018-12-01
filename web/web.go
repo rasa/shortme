@@ -39,6 +39,7 @@ func NewServer() *myServer {
 			WriteTimeout: 10 * time.Second,
 		},
 		shutdownReq: make(chan bool),
+		sighupReq: make(chan bool),
 	}
 
 	//register handlers
