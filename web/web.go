@@ -95,7 +95,7 @@ func (s *myServer) WaitShutdown() {
 		atomic.StoreUint32(&s.sighupped, 1)
 	}
 
-	log.Printf("Stoping http server")
+	log.Printf("Stopping http server")
 
 	//Create shutdown context with 10 second timeout
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
