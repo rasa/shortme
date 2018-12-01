@@ -50,8 +50,8 @@ func NewServer() *myServer {
 	r.HandleFunc("/short", api.ShortURL).Methods(http.MethodPost).HeadersRegexp("Content-Type", "application/json")
 	r.HandleFunc("/version", api.CheckVersion).Methods(http.MethodGet)
 
-	r.HandleFunc("/sigint", s.ShutdownHandler)
-	r.HandleFunc("/sighup", s.SighupHandler)
+	r.HandleFunc("/shutdown", s.ShutdownHandler)
+	r.HandleFunc("/reload", s.SighupHandler)
 
 	r.HandleFunc("/", www.Index).Methods(http.MethodGet)
 	r.HandleFunc("/index.html", www.Index).Methods(http.MethodGet)
