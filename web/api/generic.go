@@ -20,6 +20,7 @@ const (
 var bb bytes.Buffer
 
 func Init() {
+	bb.Reset()
 	fh, err := _template.Assets.Open(html)
 	if err != nil {
 		log.Fatalf("Failed to open %v: %v", template_html, err)
