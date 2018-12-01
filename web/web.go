@@ -25,7 +25,9 @@ import (
 type myServer struct {
 	http.Server
 	shutdownReq chan bool
+	sighupReq   chan bool
 	reqCount    uint32
+	sighupCount uint32
 	sighupped   uint32
 }
 
@@ -47,7 +49,9 @@ func NewServer() *myServer {
 	r.HandleFunc("/health", api.CheckHealth).Methods(http.MethodGet)
 	r.HandleFunc("/short", api.ShortURL).Methods(http.MethodPost).HeadersRegexp("Content-Type", "application/json")
 	r.HandleFunc("/version", api.CheckVersion).Methods(http.MethodGet)
+
 	r.HandleFunc("/shutdown", s.ShutdownHandler)
+	r.HandleFunc("/sighup", s.SighupHandler)
 
 	r.HandleFunc("/", www.Index).Methods(http.MethodGet)
 	r.HandleFunc("/index.html", www.Index).Methods(http.MethodGet)
@@ -84,7 +88,10 @@ func (s *myServer) WaitShutdown() {
 			atomic.CompareAndSwapUint32(&s.sighupped, 0, 1)
 		}
 	case sig := <-s.shutdownReq:
-		log.Printf("Shutdown shutdown request via /shutdown URL: %v", sig)
+		log.Printf("Shutdown request via /shutdown URL: %v", sig)
+	case sig := <-s.sighupReq:
+		log.Printf("Sighup request via /sighup URL: %v", sig)
+		atomic.CompareAndSwapUint32(&s.sighupped, 0, 1)
 	}
 
 	log.Printf("Stoping http server")
@@ -112,6 +119,21 @@ func (s *myServer) ShutdownHandler(w http.ResponseWriter, r *http.Request) {
 
 	go func() {
 		s.shutdownReq <- true
+	}()
+}
+
+func (s *myServer) SighupHandler(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("Shutting down http server"))
+
+	//Do nothing if shutdown request already issued
+	//if s.reqCount == 0 then set to 1, return true otherwise false
+	if !atomic.CompareAndSwapUint32(&s.sighupCount, 0, 1) {
+		log.Printf("Sighup via API call already in progress")
+		return
+	}
+
+	go func() {
+		s.sighupReq <- true
 	}()
 }
 
