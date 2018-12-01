@@ -55,17 +55,10 @@ func ShortURL(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var longURL *url.URL
+	//var longURL *url.URL
 	shortReq.LongURL = strings.TrimSpace(shortReq.LongURL)
-	lower := strings.ToLower(shortReq.LongURL)
-
-	if !strings.HasPrefix(lower, "http://") && !strings.HasPrefix(lower, "https://") {
-		if !strings.HasPrefix(shortReq.LongURL, "//") {
-			shortReq.LongURL = "//" + shortReq.LongURL
-		}
-		shortReq.LongURL = "http:" + shortReq.LongURL
-	}
-	longURL, err = url.Parse(shortReq.LongURL)
+	
+	longURL, err := url.Parse(shortReq.LongURL)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		errMsg, _ := json.Marshal(errorResp{Msg: "requested url is malformed"})
@@ -73,20 +66,28 @@ func ShortURL(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if longURL.Scheme == "" {
+		longURL.Scheme = "http"
+	}
+	
 	if longURL.Host == "" {
 		w.WriteHeader(http.StatusBadRequest)
 		errMsg, _ := json.Marshal(errorResp{Msg: "requested url is malformed"})
 		w.Write(errMsg)
 		return
 	}
-
-	if strings.ToLower(longURL.Host) == strings.ToLower(conf.Conf.Common.DomainName) {
+	
+	longURL.Scheme := strings.ToLower(longURL.Scheme)
+	longURL.Host := strings.ToLower(longURL.Host)
+	
+	if longURL.Host == strings.ToLower(conf.Conf.Common.DomainName) {
 		w.WriteHeader(http.StatusBadRequest)
 		errMsg, _ := json.Marshal(errorResp{Msg: "requested url is already shortened"})
 		w.Write(errMsg)
 		return
 	}
-	if strings.ToLower(longURL.Scheme) != "http" && strings.ToLower(longURL.Scheme) != "https" {
+	
+	if longURL.Scheme != "http" && longURL.Scheme != "https" {
 		w.WriteHeader(http.StatusBadRequest)
 		errMsg, _ := json.Marshal(errorResp{Msg: "requested url is not a http or https url"})
 		w.Write(errMsg)
@@ -94,7 +95,7 @@ func ShortURL(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var shortenedURL string
-	shortenedURL, err = short.Shorter.Short(shortReq.LongURL)
+	shortenedURL, err = short.Shorter.Short(longURL.String())
 	if err != nil {
 		log.Printf("Short url error: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
