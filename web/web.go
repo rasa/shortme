@@ -123,7 +123,7 @@ func (s *myServer) ShutdownHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *myServer) SighupHandler(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Shutting down http server"))
+	w.Write([]byte("Restarting http server"))
 
 	//Do nothing if shutdown request already issued
 	//if s.reqCount == 0 then set to 1, return true otherwise false
@@ -131,6 +131,8 @@ func (s *myServer) SighupHandler(w http.ResponseWriter, r *http.Request) {
 		log.Printf("Sighup via API call already in progress")
 		return
 	}
+
+	atomic.CompareAndSwapUint32(&s.sighupped, 0, 1)
 
 	go func() {
 		s.sighupReq <- true
