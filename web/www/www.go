@@ -18,6 +18,7 @@ const (
 var bb bytes.Buffer
 
 func Init() {
+	bb.Reset()
 	_template.Init()
 	fh, err := _template.Assets.Open(html)
 	if err != nil {
