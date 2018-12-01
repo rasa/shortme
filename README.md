@@ -356,6 +356,7 @@ self phone. This remains to be tested more meticulous.
 * URLs can be entered as example.com, or https://example.com
 * Single file deployment, all assets are compiled into executable
 * Graceful shutdowns supported via /shutdown URL, or sending SIGINT/Ctrl-C
+* Graceful reload supported by /reload URL, or sending SIGHUP signal
 * Add option to use Redis or Badger for sequence backend
 * Allow short URLs longer than 11 characters (to support custom URLs)
 * Support all allowed URL characters [0-9A-Za-z$_.+!*'(),-]
