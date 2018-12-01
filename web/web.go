@@ -27,7 +27,6 @@ type myServer struct {
 	shutdownReq chan bool
 	sighupReq   chan bool
 	reqCount    uint32
-	sighupCount uint32
 	sighupped   uint32
 }
 
@@ -50,7 +49,7 @@ func NewServer() *myServer {
 	r.HandleFunc("/short", api.ShortURL).Methods(http.MethodPost).HeadersRegexp("Content-Type", "application/json")
 	r.HandleFunc("/version", api.CheckVersion).Methods(http.MethodGet)
 
-	r.HandleFunc("/shutdown", s.ShutdownHandler)
+	r.HandleFunc("/sigint", s.ShutdownHandler)
 	r.HandleFunc("/sighup", s.SighupHandler)
 
 	r.HandleFunc("/", www.Index).Methods(http.MethodGet)
@@ -83,14 +82,15 @@ func (s *myServer) WaitShutdown() {
 	select {
 	case sig := <-irqSig:
 		log.Printf("Received shutdown request: %v", sig)
-		atomic.CompareAndSwapUint32(&s.reqCount, 0, 1)
 		if sig == syscall.SIGHUP {
 			atomic.CompareAndSwapUint32(&s.sighupped, 0, 1)
 		}
 	case sig := <-s.shutdownReq:
-		log.Printf("Shutdown request via /shutdown URL: %v", sig)
+		log.Printf("Shutdown request via /sigint URL: %v", sig)
+		atomic.CompareAndSwapUint32(&s.reqCount, 0, 1)
 	case sig := <-s.sighupReq:
 		log.Printf("Sighup request via /sighup URL: %v", sig)
+		atomic.CompareAndSwapUint32(&s.reqCount, 0, 1)
 		atomic.CompareAndSwapUint32(&s.sighupped, 0, 1)
 	}
 
@@ -125,22 +125,22 @@ func (s *myServer) ShutdownHandler(w http.ResponseWriter, r *http.Request) {
 func (s *myServer) SighupHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Restarting http server"))
 
+	atomic.CompareAndSwapUint32(&s.sighupped, 0, 1)
+
 	//Do nothing if shutdown request already issued
 	//if s.reqCount == 0 then set to 1, return true otherwise false
-	if !atomic.CompareAndSwapUint32(&s.sighupCount, 0, 1) {
+	if !atomic.CompareAndSwapUint32(&s.reqCount, 0, 1) {
 		log.Printf("Sighup via API call already in progress")
 		return
 	}
-
-	atomic.CompareAndSwapUint32(&s.sighupped, 0, 1)
 
 	go func() {
 		s.sighupReq <- true
 	}()
 }
 
-func (s *myServer) Running() bool {
-	return atomic.LoadUint32(&s.reqCount) == 0
+func (s *myServer) Quitting() bool {
+	return atomic.LoadUint32(&s.reqCount) != 0
 }
 
 func (s *myServer) Sighupped() bool {
@@ -161,7 +161,7 @@ func Start() bool {
 		log.Printf("Starting http server on %v", conf.Conf.Http.Listen)
 		err := server.ListenAndServe()
 		if err != nil {
-			if server.Running() {
+			if !server.Quitting() {
 				log.Printf("ListenAndServe() failed: %v", err)
 			}
 		}
