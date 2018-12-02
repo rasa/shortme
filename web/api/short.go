@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"regexp"
 	"strings"
 
 	"github.com/gorilla/mux"
@@ -57,7 +58,11 @@ func ShortURL(w http.ResponseWriter, r *http.Request) {
 
 	//var longURL *url.URL
 	shortReq.LongURL = strings.TrimSpace(shortReq.LongURL)
-	
+
+	re := regexp.MustCompile("(?i)^https?://")
+	if !re.MatchString(shortReq.LongURL) {
+		shortReq.LongURL = "http://" + shortReq.LongURL
+	}
 	longURL, err := url.Parse(shortReq.LongURL)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -66,27 +71,27 @@ func ShortURL(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if longURL.Scheme == "" {
-		longURL.Scheme = "http"
-	}
-	
 	if longURL.Host == "" {
 		w.WriteHeader(http.StatusBadRequest)
 		errMsg, _ := json.Marshal(errorResp{Msg: "requested url is malformed"})
 		w.Write(errMsg)
 		return
 	}
-	
-	longURL.Scheme := strings.ToLower(longURL.Scheme)
-	longURL.Host := strings.ToLower(longURL.Host)
-	
+
+	if longURL.Path == "" {
+		longURL.Path = "/"
+	}
+
+	longURL.Scheme = strings.ToLower(longURL.Scheme)
+	longURL.Host = strings.ToLower(longURL.Host)
+
 	if longURL.Host == strings.ToLower(conf.Conf.Common.DomainName) {
 		w.WriteHeader(http.StatusBadRequest)
 		errMsg, _ := json.Marshal(errorResp{Msg: "requested url is already shortened"})
 		w.Write(errMsg)
 		return
 	}
-	
+
 	if longURL.Scheme != "http" && longURL.Scheme != "https" {
 		w.WriteHeader(http.StatusBadRequest)
 		errMsg, _ := json.Marshal(errorResp{Msg: "requested url is not a http or https url"})
