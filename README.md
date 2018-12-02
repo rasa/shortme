@@ -354,6 +354,7 @@ self phone. This remains to be tested more meticulous.
  
 * Do not shorten URLs that have already been shortened
 * URLs can be entered as example.com, or https://example.com
+* Normalize URL so example.com and Example.com are seen as the same
 * Single file deployment, all assets are compiled into executable
 * Graceful shutdowns supported via /shutdown URL, or sending SIGINT/Ctrl-C
 * Graceful reload supported by /reload URL, or sending SIGHUP signal
